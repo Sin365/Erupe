@@ -42,9 +42,9 @@ services:
     # build:
     #   context: ../
     volumes:
-      - ./config.json:/app/erupe/config.json
-      - ./bin:/app/erupe/bin
-      - ./savedata:/app/erupe/savedata
+      - ./config.json:/app/config.json
+      - ./bin:/app/bin
+      - ./savedata:/app/savedata
     ports:
       # (Make sure these match config.json)
       - "53312:53312" #Sign V1
