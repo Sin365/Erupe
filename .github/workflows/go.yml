@@ -43,12 +43,14 @@ jobs:
     - name: Run Tests with Race Detector and Coverage
       run: go test -race -coverprofile=coverage.out ./... -timeout=10m
 
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        files: ./coverage.out
-        flags: unittests
-        name: codecov-umbrella
+    - name: Check coverage threshold
+      run: |
+        COVERAGE=$(go tool cover -func=coverage.out | grep '^total:' | awk '{print substr($3, 1, length($3)-1)}')
+        echo "Total coverage: ${COVERAGE}%"
+        if [ "$(echo "$COVERAGE < 50" | bc)" -eq 1 ]; then
+          echo "::error::Coverage ${COVERAGE}% is below 50% threshold"
+          exit 1
+        fi
 
   build:
     name: Build

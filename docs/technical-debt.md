@@ -59,8 +59,8 @@ These are validated indirectly through mock-based handler tests but have no SQL-
 
 ### 4. CI updates
 
-- ~~`codecov-action@v4` could be updated to `v5` (current stable)~~ **Fixed.** Updated to `codecov-action@v5`.
-- No coverage threshold is enforced — coverage is uploaded but regressions aren't caught
+- ~~`codecov-action@v4` could be updated to `v5` (current stable)~~ **Removed.** Replaced with local `go tool cover` threshold check (no Codecov account needed).
+- ~~No coverage threshold is enforced — coverage is uploaded but regressions aren't caught~~ **Fixed.** CI now fails if total coverage drops below 50% (current: ~58%).
 
 ---
 
@@ -93,4 +93,4 @@ Based on remaining impact:
 1. ~~**Add tests for `handlers_commands.go`**~~ — **Done.** 62 tests covering all 12 commands (ban, timer, PSN, reload, key quest, rights, course, raviente, teleport, discord, playtime, help), disabled-command gating, op overrides, error paths, and `initCommands`.
 2. **Fix bookshelf data pointer** (`model_character.go`) — corrupts saves for three game versions (needs save data validation)
 3. **Fix achievement rank-up notifications** (`handlers_achievement.go:125`) — needs protocol research on `MhfDisplayedAchievement`
-4. **Add coverage threshold** to CI — prevents regressions
+4. ~~**Add coverage threshold** to CI~~ — **Done.** 50% floor enforced via `go tool cover` in CI; Codecov removed.
