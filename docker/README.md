@@ -19,7 +19,7 @@
    docker compose up
    ```
 
-The database is automatically initialized and patched on first start via `init/setup.sh`.
+The database schema is automatically applied on first start via the embedded migration system.
 
 pgAdmin is available at `http://localhost:5050` (default login: `user@pgadmin.com` / `password`).
 
@@ -45,18 +45,14 @@ To delete all persistent data, remove these directories after stopping:
 
 ## Updating
 
-After pulling new changes:
+After pulling new changes, rebuild and restart. Schema migrations are applied automatically on startup.
 
-1. Check for new patch schemas in `schemas/patch-schema/` — apply them via pgAdmin or `psql` into the running database container.
-
-2. Rebuild and restart:
-
-   ```bash
-   docker compose down
-   docker compose build
-   docker compose up
-   ```
+```bash
+docker compose down
+docker compose build
+docker compose up
+```
 
 ## Troubleshooting
 
-**Postgres won't populate on Windows**: `init/setup.sh` must use LF line endings, not CRLF. Open it in your editor and convert.
+**Postgres won't start on Windows**: Ensure `docker/db-data/` doesn't contain stale data from a different PostgreSQL version. Delete it and restart to reinitialize.

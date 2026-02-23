@@ -145,10 +145,20 @@ h1{font-size:1.75rem;margin-bottom:.5rem;color:#e94560;text-align:center}
     </div>
     <div style="font-size:.75rem;color:#666;margin-top:.3rem">Use 127.0.0.1 for local play, or auto-detect for LAN/internet play.</div>
   </div>
-  <div class="field">
-    <label>Client Mode</label>
-    <select id="srv-client-mode"></select>
-    <div style="font-size:.75rem;color:#666;margin-top:.3rem">Must match your game client version. ZZ is the latest.</div>
+  <div class="field-row">
+    <div class="field">
+      <label>Client Mode</label>
+      <select id="srv-client-mode"></select>
+      <div style="font-size:.75rem;color:#666;margin-top:.3rem">Must match your game client version. ZZ is the latest.</div>
+    </div>
+    <div class="field field-sm">
+      <label>Language</label>
+      <select id="srv-language">
+        <option value="jp" selected>jp</option>
+        <option value="en">en</option>
+      </select>
+      <div style="font-size:.75rem;color:#666;margin-top:.3rem">Game text language.</div>
+    </div>
   </div>
   <label class="checkbox" style="margin-top:1rem"><input type="checkbox" id="srv-auto-create" checked> Auto-create accounts (recommended for private servers)</label>
   <div class="actions">
@@ -339,6 +349,7 @@ function buildReview() {
     ['Database Password', masked],
     ['Database Name', document.getElementById('db-name').value],
     ['Server Host', document.getElementById('srv-host').value],
+    ['Language', document.getElementById('srv-language').value],
     ['Client Mode', document.getElementById('srv-client-mode').value],
     ['Auto-create Accounts', document.getElementById('srv-auto-create').checked ? 'Yes' : 'No'],
   ];
@@ -362,6 +373,7 @@ async function finish() {
         dbPassword: document.getElementById('db-password').value,
         dbName: document.getElementById('db-name').value,
         host: document.getElementById('srv-host').value,
+        language: document.getElementById('srv-language').value,
         clientMode: document.getElementById('srv-client-mode').value,
         autoCreateAccount: document.getElementById('srv-auto-create').checked,
       })

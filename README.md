@@ -197,14 +197,10 @@ Multiple channel servers can run simultaneously, organized by world types: Newbi
 
 ## Database Schemas
 
-Erupe uses a structured schema system:
+Erupe uses an embedded auto-migrating schema system. Migrations in [server/migrations/sql/](./server/migrations/sql/) are applied automatically on startup — no manual SQL steps needed.
 
-- **Initialization Schema**: Bootstraps database to version 9.1.0
-- **Update Schemas**: Production-ready updates for new releases
-- **Patch Schemas**: Development updates (subject to change)
-- **Seed Data**: Demo templates for shops, distributions, events, and gacha in [server/migrations/seed/](./server/migrations/seed/)
-
-**Note**: Only use patch schemas if you're following active development. They get consolidated into update schemas on release.
+- **Migrations**: Numbered SQL files (`0001_init.sql`, `0002_*.sql`, ...) tracked in a `schema_version` table
+- **Seed Data**: Demo templates for shops, distributions, events, and gacha in [server/migrations/seed/](./server/migrations/seed/) — applied automatically on fresh databases
 
 ## Development
 
@@ -237,7 +233,7 @@ go test -v -race ./...     # Check for race conditions (mandatory before merging
 
 ### Database schema errors
 
-- Ensure all patch files are applied in order
+- Schema migrations run automatically on startup — check the server logs for migration errors
 - Check PostgreSQL logs for detailed error messages
 - Verify database user has sufficient privileges
 

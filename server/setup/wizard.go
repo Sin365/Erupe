@@ -26,6 +26,7 @@ type FinishRequest struct {
 	DBPassword        string `json:"dbPassword"`
 	DBName            string `json:"dbName"`
 	Host              string `json:"host"`
+	Language          string `json:"language"`
 	ClientMode        string `json:"clientMode"`
 	AutoCreateAccount bool   `json:"autoCreateAccount"`
 }
@@ -33,8 +34,13 @@ type FinishRequest struct {
 // buildDefaultConfig produces a minimal config map with only user-provided values.
 // All other settings are filled by Viper's registered defaults at load time.
 func buildDefaultConfig(req FinishRequest) map[string]interface{} {
+	lang := req.Language
+	if lang == "" {
+		lang = "jp"
+	}
 	return map[string]interface{}{
 		"Host":              req.Host,
+		"Language":          lang,
 		"ClientMode":        req.ClientMode,
 		"AutoCreateAccount": req.AutoCreateAccount,
 		"Database": map[string]interface{}{

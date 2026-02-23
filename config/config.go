@@ -342,6 +342,7 @@ func getOutboundIP4() (net.IP, error) {
 // config.json (just database credentials) produces a fully working server.
 func registerDefaults() {
 	// Top-level settings
+	viper.SetDefault("Language", "jp")
 	viper.SetDefault("BinPath", "bin")
 	viper.SetDefault("HideLoginNotice", true)
 	viper.SetDefault("LoginNotices", []string{

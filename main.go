@@ -2,6 +2,7 @@ package main
 
 import (
 	cfg "erupe-ce/config"
+	"flag"
 	"fmt"
 	"net"
 	"os"
@@ -71,6 +72,9 @@ func setupDiscordBot(config *cfg.Config, logger *zap.Logger) *discordbot.Discord
 }
 
 func main() {
+	runSetup := flag.Bool("setup", false, "Launch the setup wizard (even if config.json exists)")
+	flag.Parse()
+
 	var err error
 
 	var zapLogger *zap.Logger
@@ -78,6 +82,13 @@ func main() {
 
 	defer func() { _ = zapLogger.Sync() }()
 	logger := zapLogger.Named("main")
+
+	if *runSetup {
+		logger.Info("Launching setup wizard (--setup)")
+		if err := setup.Run(logger.Named("setup"), 8080); err != nil {
+			logger.Fatal("Setup wizard failed", zap.Error(err))
+		}
+	}
 
 	config, cfgErr := cfg.LoadConfig()
 	if cfgErr != nil {
@@ -156,6 +167,7 @@ func main() {
 	logger.Info("Database: Started successfully")
 
 	// Run database migrations
+	verBefore, _ := migrations.Version(db)
 	applied, migErr := migrations.Migrate(db, logger.Named("migrations"))
 	if migErr != nil {
 		preventClose(config, fmt.Sprintf("Database migration failed: %s", migErr.Error()))
@@ -163,6 +175,18 @@ func main() {
 	if applied > 0 {
 		ver, _ := migrations.Version(db)
 		logger.Info(fmt.Sprintf("Database: Applied %d migration(s), now at version %d", applied, ver))
+	}
+
+	// Auto-apply seed data on a fresh database so users who skip the wizard
+	// still get shops, events, and gacha. Seed files use ON CONFLICT DO NOTHING
+	// so this is safe to run even if data already exists.
+	if verBefore == 0 && applied > 0 {
+		seedApplied, seedErr := migrations.ApplySeedData(db, logger.Named("migrations"))
+		if seedErr != nil {
+			logger.Warn(fmt.Sprintf("Seed data failed: %s", seedErr.Error()))
+		} else if seedApplied > 0 {
+			logger.Info(fmt.Sprintf("Database: Applied %d seed data file(s)", seedApplied))
+		}
 	}
 
 	// Pre-compute all server IDs this instance will own, so we only
