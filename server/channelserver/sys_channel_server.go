@@ -71,6 +71,7 @@ type Server struct {
 	miscRepo        MiscRepo
 	scenarioRepo    ScenarioRepo
 	mercenaryRepo   MercenaryRepo
+	guildService    *GuildService
 	erupeConfig     *cfg.Config
 	acceptConns     chan net.Conn
 	deleteConns     chan net.Conn
@@ -152,6 +153,8 @@ func NewServer(config *Config) *Server {
 	s.miscRepo = NewMiscRepository(config.DB)
 	s.scenarioRepo = NewScenarioRepository(config.DB)
 	s.mercenaryRepo = NewMercenaryRepository(config.DB)
+
+	s.guildService = NewGuildService(s.guildRepo, s.mailRepo, s.charRepo, s.logger)
 
 	// Mezeporta
 	s.stages.Store("sl1Ns200p0a0u0", NewStage("sl1Ns200p0a0u0"))

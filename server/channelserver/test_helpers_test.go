@@ -51,7 +51,14 @@ func createMockServer() *Server {
 	}
 	s.i18n = getLangStrings(s)
 	s.Registry = NewLocalChannelRegistry([]*Server{s})
+	// GuildService is wired lazily by tests that set repos then call ensureGuildService.
 	return s
+}
+
+// ensureGuildService wires the GuildService from the server's current repos.
+// Call this after setting guildRepo, mailRepo, and charRepo on the mock server.
+func ensureGuildService(s *Server) {
+	s.guildService = NewGuildService(s.guildRepo, s.mailRepo, s.charRepo, s.logger)
 }
 
 // createMockSession creates a minimal Session for testing.

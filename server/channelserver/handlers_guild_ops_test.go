@@ -448,6 +448,7 @@ func TestOperateGuildMember_Accept(t *testing.T) {
 	guildMock.guild.LeaderCharID = 1
 	server.guildRepo = guildMock
 	server.mailRepo = mailMock
+	ensureGuildService(server)
 	session := createMockSession(1, server)
 
 	pkt := &mhfpacket.MsgMhfOperateGuildMember{
@@ -486,6 +487,7 @@ func TestOperateGuildMember_Reject(t *testing.T) {
 	guildMock.guild.LeaderCharID = 1
 	server.guildRepo = guildMock
 	server.mailRepo = mailMock
+	ensureGuildService(server)
 	session := createMockSession(1, server)
 
 	pkt := &mhfpacket.MsgMhfOperateGuildMember{
@@ -515,6 +517,7 @@ func TestOperateGuildMember_Kick(t *testing.T) {
 	guildMock.guild.LeaderCharID = 1
 	server.guildRepo = guildMock
 	server.mailRepo = mailMock
+	ensureGuildService(server)
 	session := createMockSession(1, server)
 
 	pkt := &mhfpacket.MsgMhfOperateGuildMember{
@@ -544,6 +547,7 @@ func TestOperateGuildMember_MailError(t *testing.T) {
 	guildMock.guild.LeaderCharID = 1
 	server.guildRepo = guildMock
 	server.mailRepo = mailMock
+	ensureGuildService(server)
 	session := createMockSession(1, server)
 
 	pkt := &mhfpacket.MsgMhfOperateGuildMember{
@@ -572,6 +576,7 @@ func TestOperateGuildMember_NotLeaderOrSub(t *testing.T) {
 	guildMock.guild.LeaderCharID = 999 // not the session char
 	server.guildRepo = guildMock
 	server.mailRepo = &mockMailRepo{}
+	ensureGuildService(server)
 	session := createMockSession(1, server)
 
 	pkt := &mhfpacket.MsgMhfOperateGuildMember{

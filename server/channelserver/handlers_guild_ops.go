@@ -266,58 +266,32 @@ func handleAvoidLeadershipUpdate(s *Session, pkt *mhfpacket.MsgMhfOperateGuild, 
 func handleMsgMhfOperateGuildMember(s *Session, p mhfpacket.MHFPacket) {
 	pkt := p.(*mhfpacket.MsgMhfOperateGuildMember)
 
-	guild, err := s.server.guildRepo.GetByCharID(pkt.CharID)
-
-	if err != nil || guild == nil {
-		doAckSimpleFail(s, pkt.AckHandle, make([]byte, 4))
-		return
-	}
-
-	actorCharacter, err := s.server.guildRepo.GetCharacterMembership(s.charID)
-
-	if err != nil || (!actorCharacter.IsSubLeader() && guild.LeaderCharID != s.charID) {
-		doAckSimpleFail(s, pkt.AckHandle, make([]byte, 4))
-		return
-	}
-
-	var mail Mail
-	switch pkt.Action {
-	case mhfpacket.OPERATE_GUILD_MEMBER_ACTION_ACCEPT:
-		err = s.server.guildRepo.AcceptApplication(guild.ID, pkt.CharID)
-		mail = Mail{
-			RecipientID:     pkt.CharID,
-			Subject:         "Accepted!",
-			Body:            fmt.Sprintf("Your application to join 「%s」 was accepted.", guild.Name),
-			IsSystemMessage: true,
-		}
-	case mhfpacket.OPERATE_GUILD_MEMBER_ACTION_REJECT:
-		err = s.server.guildRepo.RejectApplication(guild.ID, pkt.CharID)
-		mail = Mail{
-			RecipientID:     pkt.CharID,
-			Subject:         "Rejected",
-			Body:            fmt.Sprintf("Your application to join 「%s」 was rejected.", guild.Name),
-			IsSystemMessage: true,
-		}
-	case mhfpacket.OPERATE_GUILD_MEMBER_ACTION_KICK:
-		err = s.server.guildRepo.RemoveCharacter(pkt.CharID)
-		mail = Mail{
-			RecipientID:     pkt.CharID,
-			Subject:         "Kicked",
-			Body:            fmt.Sprintf("You were kicked from 「%s」.", guild.Name),
-			IsSystemMessage: true,
-		}
-	default:
-		doAckSimpleFail(s, pkt.AckHandle, make([]byte, 4))
+	action, ok := mapMemberAction(pkt.Action)
+	if !ok {
 		s.logger.Warn("Unhandled operateGuildMember action", zap.Uint8("action", pkt.Action))
+		doAckSimpleFail(s, pkt.AckHandle, make([]byte, 4))
+		return
 	}
 
+	result, err := s.server.guildService.OperateMember(s.charID, pkt.CharID, action)
 	if err != nil {
 		doAckSimpleFail(s, pkt.AckHandle, make([]byte, 4))
-	} else {
-		if err := s.server.mailRepo.SendMail(mail.SenderID, mail.RecipientID, mail.Subject, mail.Body, 0, 0, false, true); err != nil {
-			s.logger.Warn("Failed to send guild member operation mail", zap.Error(err))
-		}
-		s.server.Registry.NotifyMailToCharID(pkt.CharID, s, &mail)
-		doAckSimpleSucceed(s, pkt.AckHandle, make([]byte, 4))
+		return
+	}
+
+	s.server.Registry.NotifyMailToCharID(result.MailRecipientID, s, &result.Mail)
+	doAckSimpleSucceed(s, pkt.AckHandle, make([]byte, 4))
+}
+
+func mapMemberAction(proto uint8) (GuildMemberAction, bool) {
+	switch proto {
+	case mhfpacket.OPERATE_GUILD_MEMBER_ACTION_ACCEPT:
+		return GuildMemberActionAccept, true
+	case mhfpacket.OPERATE_GUILD_MEMBER_ACTION_REJECT:
+		return GuildMemberActionReject, true
+	case mhfpacket.OPERATE_GUILD_MEMBER_ACTION_KICK:
+		return GuildMemberActionKick, true
+	default:
+		return 0, false
 	}
 }
