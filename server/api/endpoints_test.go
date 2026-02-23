@@ -572,6 +572,44 @@ func TestNewAuthDataTimestamps(t *testing.T) {
 	}
 }
 
+// TestHealthEndpointNoDB tests the /health endpoint when no database is configured.
+func TestHealthEndpointNoDB(t *testing.T) {
+	logger := NewTestLogger(t)
+	defer func() { _ = logger.Sync() }()
+
+	server := &APIServer{
+		logger:      logger,
+		erupeConfig: NewTestConfig(),
+		db:          nil,
+	}
+
+	req := httptest.NewRequest("GET", "/health", nil)
+	recorder := httptest.NewRecorder()
+
+	server.Health(recorder, req)
+
+	if recorder.Code != http.StatusServiceUnavailable {
+		t.Errorf("Expected status %d, got %d", http.StatusServiceUnavailable, recorder.Code)
+	}
+
+	if contentType := recorder.Header().Get("Content-Type"); contentType != "application/json" {
+		t.Errorf("Content-Type = %v, want application/json", contentType)
+	}
+
+	var resp map[string]string
+	if err := json.NewDecoder(recorder.Body).Decode(&resp); err != nil {
+		t.Fatalf("Failed to decode response: %v", err)
+	}
+
+	if resp["status"] != "unhealthy" {
+		t.Errorf("status = %q, want %q", resp["status"], "unhealthy")
+	}
+
+	if resp["error"] != "database not configured" {
+		t.Errorf("error = %q, want %q", resp["error"], "database not configured")
+	}
+}
+
 // BenchmarkLauncherEndpoint benchmarks the launcher endpoint
 func BenchmarkLauncherEndpoint(b *testing.B) {
 	logger, _ := zap.NewDevelopment()

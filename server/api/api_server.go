@@ -26,6 +26,7 @@ type Config struct {
 type APIServer struct {
 	sync.Mutex
 	logger         *zap.Logger
+	db             *sqlx.DB
 	erupeConfig    *cfg.Config
 	userRepo       APIUserRepo
 	charRepo       APICharacterRepo
@@ -38,6 +39,7 @@ type APIServer struct {
 func NewAPIServer(config *Config) *APIServer {
 	s := &APIServer{
 		logger:      config.Logger,
+		db:          config.DB,
 		erupeConfig: config.ErupeConfig,
 		httpServer:  &http.Server{},
 	}
@@ -61,6 +63,7 @@ func (s *APIServer) Start() error {
 	r.HandleFunc("/character/export", s.ExportSave)
 	r.HandleFunc("/api/ss/bbs/upload.php", s.ScreenShot)
 	r.HandleFunc("/api/ss/bbs/{id}", s.ScreenShotGet)
+	r.HandleFunc("/health", s.Health)
 	r.HandleFunc("/version", s.Version)
 	handler := handlers.CORS(handlers.AllowedHeaders([]string{"Content-Type"}))(r)
 	s.httpServer.Handler = handlers.LoggingHandler(os.Stdout, handler)

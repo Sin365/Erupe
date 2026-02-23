@@ -20,6 +20,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
+      start_period: 5s
       retries: 5
   pgadmin:
     image: dpage/pgadmin4
@@ -59,3 +60,9 @@ services:
       - "54006:54006"
       - "54007:54007"
       - "54008:54008"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      start_period: 15s
+      retries: 3
