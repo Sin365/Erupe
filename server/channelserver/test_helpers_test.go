@@ -66,6 +66,11 @@ func ensureAchievementService(s *Server) {
 	s.achievementService = NewAchievementService(s.achievementRepo, s.logger)
 }
 
+// ensureGachaService wires the GachaService from the server's current repos.
+func ensureGachaService(s *Server) {
+	s.gachaService = NewGachaService(s.gachaRepo, s.userRepo, s.charRepo, s.logger, 100000)
+}
+
 // createMockSession creates a minimal Session for testing.
 // Imported from v9.2.x-stable and adapted for main.
 func createMockSession(charID uint32, server *Server) *Session {

@@ -73,6 +73,7 @@ type Server struct {
 	mercenaryRepo   MercenaryRepo
 	guildService       *GuildService
 	achievementService *AchievementService
+	gachaService       *GachaService
 	erupeConfig     *cfg.Config
 	acceptConns     chan net.Conn
 	deleteConns     chan net.Conn
@@ -157,6 +158,7 @@ func NewServer(config *Config) *Server {
 
 	s.guildService = NewGuildService(s.guildRepo, s.mailRepo, s.charRepo, s.logger)
 	s.achievementService = NewAchievementService(s.achievementRepo, s.logger)
+	s.gachaService = NewGachaService(s.gachaRepo, s.userRepo, s.charRepo, s.logger, config.ErupeConfig.GameplayOptions.MaximumNP)
 
 	// Mezeporta
 	s.stages.Store("sl1Ns200p0a0u0", NewStage("sl1Ns200p0a0u0"))

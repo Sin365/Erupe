@@ -189,6 +189,7 @@ func TestHandleMsgMhfPlayNormalGacha_TransactError(t *testing.T) {
 	gachaRepo := &mockGachaRepo{txErr: errors.New("transact failed")}
 	server.gachaRepo = gachaRepo
 	server.userRepo = &mockUserRepoGacha{}
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -213,6 +214,7 @@ func TestHandleMsgMhfPlayNormalGacha_RewardPoolError(t *testing.T) {
 	}
 	server.gachaRepo = gachaRepo
 	server.userRepo = &mockUserRepoGacha{}
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -243,6 +245,7 @@ func TestHandleMsgMhfPlayNormalGacha_Success(t *testing.T) {
 	}
 	server.gachaRepo = gachaRepo
 	server.userRepo = &mockUserRepoGacha{}
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -269,6 +272,7 @@ func TestHandleMsgMhfPlayStepupGacha_TransactError(t *testing.T) {
 	gachaRepo := &mockGachaRepo{txErr: errors.New("transact failed")}
 	server.gachaRepo = gachaRepo
 	server.userRepo = &mockUserRepoGacha{}
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -302,6 +306,7 @@ func TestHandleMsgMhfPlayStepupGacha_Success(t *testing.T) {
 	}
 	server.gachaRepo = gachaRepo
 	server.userRepo = &mockUserRepoGacha{}
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -331,6 +336,7 @@ func TestHandleMsgMhfGetStepupStatus_FreshStep(t *testing.T) {
 		hasEntryType: true,
 	}
 	server.gachaRepo = gachaRepo
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -354,6 +360,7 @@ func TestHandleMsgMhfGetStepupStatus_StaleStep(t *testing.T) {
 		stepupTime: time.Now().Add(-48 * time.Hour), // stale
 	}
 	server.gachaRepo = gachaRepo
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -378,6 +385,7 @@ func TestHandleMsgMhfGetStepupStatus_NoRows(t *testing.T) {
 		stepupErr: sql.ErrNoRows,
 	}
 	server.gachaRepo = gachaRepo
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -400,6 +408,7 @@ func TestHandleMsgMhfGetStepupStatus_NoEntryType(t *testing.T) {
 		hasEntryType: false, // no matching entry type -> reset
 	}
 	server.gachaRepo = gachaRepo
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -424,6 +433,7 @@ func TestHandleMsgMhfGetBoxGachaInfo_Error(t *testing.T) {
 		boxEntryIDsErr: errors.New("db error"),
 	}
 	server.gachaRepo = gachaRepo
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -444,6 +454,7 @@ func TestHandleMsgMhfGetBoxGachaInfo_Success(t *testing.T) {
 		boxEntryIDs: []uint32{10, 20, 30},
 	}
 	server.gachaRepo = gachaRepo
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -465,6 +476,7 @@ func TestHandleMsgMhfPlayBoxGacha_TransactError(t *testing.T) {
 	gachaRepo := &mockGachaRepo{txErr: errors.New("transact failed")}
 	server.gachaRepo = gachaRepo
 	server.userRepo = &mockUserRepoGacha{}
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -495,6 +507,7 @@ func TestHandleMsgMhfPlayBoxGacha_Success(t *testing.T) {
 	}
 	server.gachaRepo = gachaRepo
 	server.userRepo = &mockUserRepoGacha{}
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -517,6 +530,7 @@ func TestHandleMsgMhfResetBoxGachaInfo(t *testing.T) {
 	server := createMockServer()
 	gachaRepo := &mockGachaRepo{}
 	server.gachaRepo = gachaRepo
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
@@ -594,6 +608,7 @@ func TestHandleMsgMhfPlayStepupGacha_RewardPoolError(t *testing.T) {
 	}
 	server.gachaRepo = gachaRepo
 	server.userRepo = &mockUserRepoGacha{}
+	ensureGachaService(server)
 
 	session := createMockSession(1, server)
 
