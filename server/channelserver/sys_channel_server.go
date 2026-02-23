@@ -43,13 +43,13 @@ type Config struct {
 // own locks internally and may be acquired at any point.
 type Server struct {
 	sync.Mutex
-	Registry       ChannelRegistry
-	ID             uint16
-	GlobalID       string
-	IP             string
-	Port           uint16
-	logger         *zap.Logger
-	db             *sqlx.DB
+	Registry        ChannelRegistry
+	ID              uint16
+	GlobalID        string
+	IP              string
+	Port            uint16
+	logger          *zap.Logger
+	db              *sqlx.DB
 	charRepo        CharacterRepo
 	guildRepo       GuildRepo
 	userRepo        UserRepo
@@ -71,13 +71,13 @@ type Server struct {
 	miscRepo        MiscRepo
 	scenarioRepo    ScenarioRepo
 	mercenaryRepo   MercenaryRepo
-	erupeConfig    *cfg.Config
-	acceptConns    chan net.Conn
-	deleteConns    chan net.Conn
-	sessions       map[net.Conn]*Session
-	listener       net.Listener // Listener that is created when Server.Start is called.
-	isShuttingDown bool
-	done           chan struct{} // Closed on Shutdown to wake background goroutines.
+	erupeConfig     *cfg.Config
+	acceptConns     chan net.Conn
+	deleteConns     chan net.Conn
+	sessions        map[net.Conn]*Session
+	listener        net.Listener // Listener that is created when Server.Start is called.
+	isShuttingDown  bool
+	done            chan struct{} // Closed on Shutdown to wake background goroutines.
 
 	stages StageMap
 
@@ -107,28 +107,28 @@ type Server struct {
 // NewServer creates a new Server type.
 func NewServer(config *Config) *Server {
 	s := &Server{
-		ID:              config.ID,
-		logger:          config.Logger,
-		db:              config.DB,
-		erupeConfig:     config.ErupeConfig,
-		acceptConns:     make(chan net.Conn),
-		deleteConns:     make(chan net.Conn),
-		done:            make(chan struct{}),
-		sessions:        make(map[net.Conn]*Session),
-		userBinary: NewUserBinaryStore(),
-		minidata:   NewMinidataStore(),
-		semaphore:       make(map[string]*Semaphore),
-		semaphoreIndex:  7,
-		discordBot:      config.DiscordBot,
-		name:            config.Name,
+		ID:             config.ID,
+		logger:         config.Logger,
+		db:             config.DB,
+		erupeConfig:    config.ErupeConfig,
+		acceptConns:    make(chan net.Conn),
+		deleteConns:    make(chan net.Conn),
+		done:           make(chan struct{}),
+		sessions:       make(map[net.Conn]*Session),
+		userBinary:     NewUserBinaryStore(),
+		minidata:       NewMinidataStore(),
+		semaphore:      make(map[string]*Semaphore),
+		semaphoreIndex: 7,
+		discordBot:     config.DiscordBot,
+		name:           config.Name,
 		raviente: &Raviente{
 			id:       1,
 			register: make([]uint32, 30),
 			state:    make([]uint32, 30),
 			support:  make([]uint32, 30),
 		},
-		questCache: NewQuestCache(config.ErupeConfig.QuestCacheExpiry),
-		handlerTable:   buildHandlerTable(),
+		questCache:   NewQuestCache(config.ErupeConfig.QuestCacheExpiry),
+		handlerTable: buildHandlerTable(),
 	}
 
 	s.charRepo = NewCharacterRepository(config.DB)

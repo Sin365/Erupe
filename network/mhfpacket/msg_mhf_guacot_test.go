@@ -84,9 +84,9 @@ func TestMsgMhfUpdateGuacotParse_SingleEntry(t *testing.T) {
 
 func TestMsgMhfUpdateGuacotParse_MultipleEntries(t *testing.T) {
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint32(1)  // AckHandle
-	bf.WriteUint16(3)  // EntryCount
-	bf.WriteUint16(0)  // Zeroed
+	bf.WriteUint32(1) // AckHandle
+	bf.WriteUint16(3) // EntryCount
+	bf.WriteUint16(0) // Zeroed
 
 	for idx := uint32(0); idx < 3; idx++ {
 		bf.WriteUint32(idx) // Index

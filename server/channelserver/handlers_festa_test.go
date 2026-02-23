@@ -106,4 +106,3 @@ func TestHandleMsgMhfEnumerateRanking_State3(t *testing.T) {
 		t.Error("No response packet queued")
 	}
 }
-

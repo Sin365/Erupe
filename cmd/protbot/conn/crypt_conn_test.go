@@ -58,9 +58,9 @@ func TestCryptPacketHeaderRoundTrip(t *testing.T) {
 		PacketNum:               42,
 		DataSize:                100,
 		PrevPacketCombinedCheck: 0x1234,
-		Check0:                 0xAAAA,
-		Check1:                 0xBBBB,
-		Check2:                 0xCCCC,
+		Check0:                  0xAAAA,
+		Check1:                  0xBBBB,
+		Check2:                  0xCCCC,
 	}
 
 	encoded, err := original.Encode()

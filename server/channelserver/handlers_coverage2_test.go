@@ -141,8 +141,8 @@ func TestHandleMsgMhfMercenaryHuntdata_RequestTypeIs1(t *testing.T) {
 	session := createMockSession(1, server)
 
 	pkt := &mhfpacket.MsgMhfMercenaryHuntdata{
-		AckHandle: 12345,
-		RequestType:      1,
+		AckHandle:   12345,
+		RequestType: 1,
 	}
 
 	handleMsgMhfMercenaryHuntdata(session, pkt)
@@ -162,8 +162,8 @@ func TestHandleMsgMhfMercenaryHuntdata_RequestTypeIs0(t *testing.T) {
 	session := createMockSession(1, server)
 
 	pkt := &mhfpacket.MsgMhfMercenaryHuntdata{
-		AckHandle: 12345,
-		RequestType:      0,
+		AckHandle:   12345,
+		RequestType: 0,
 	}
 
 	handleMsgMhfMercenaryHuntdata(session, pkt)
@@ -183,8 +183,8 @@ func TestHandleMsgMhfMercenaryHuntdata_RequestTypeIs2(t *testing.T) {
 	session := createMockSession(1, server)
 
 	pkt := &mhfpacket.MsgMhfMercenaryHuntdata{
-		AckHandle: 12345,
-		RequestType:      2,
+		AckHandle:   12345,
+		RequestType: 2,
 	}
 
 	handleMsgMhfMercenaryHuntdata(session, pkt)

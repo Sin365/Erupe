@@ -10,7 +10,7 @@ import (
 
 // MsgMhfMercenaryHuntdata represents the MSG_MHF_MERCENARY_HUNTDATA
 type MsgMhfMercenaryHuntdata struct {
-	AckHandle uint32
+	AckHandle   uint32
 	RequestType uint8
 }
 

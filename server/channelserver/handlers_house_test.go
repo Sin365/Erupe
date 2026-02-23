@@ -2,9 +2,9 @@ package channelserver
 
 import (
 	"erupe-ce/common/byteframe"
-	cfg "erupe-ce/config"
 	"erupe-ce/common/mhfitem"
 	"erupe-ce/common/token"
+	cfg "erupe-ce/config"
 	"erupe-ce/network/mhfpacket"
 	"testing"
 
@@ -699,7 +699,7 @@ func TestWarehouseItemSerialization(t *testing.T) {
 		items []mhfitem.MHFItemStack
 	}{
 		{
-			name: "empty_warehouse",
+			name:  "empty_warehouse",
 			items: []mhfitem.MHFItemStack{},
 		},
 		{
@@ -747,11 +747,11 @@ func TestWarehouseEquipmentSerialization(t *testing.T) {
 			equipment: []mhfitem.MHFEquipment{},
 		},
 		{
-			name: "single_equipment",
+			name:      "single_equipment",
 			equipment: createTestEquipment([]uint16{100}, []uint32{1}),
 		},
 		{
-			name: "multiple_equipment",
+			name:      "multiple_equipment",
 			equipment: createTestEquipment([]uint16{100, 101, 102}, []uint32{1, 2, 3}),
 		},
 	}
@@ -837,16 +837,16 @@ func TestWarehouseItemDiff(t *testing.T) {
 // TestWarehouseEquipmentMerge verifies equipment merging logic
 func TestWarehouseEquipmentMerge(t *testing.T) {
 	tests := []struct {
-		name        string
-		oldEquip    []mhfitem.MHFEquipment
-		newEquip    []mhfitem.MHFEquipment
-		wantMerged  int
+		name       string
+		oldEquip   []mhfitem.MHFEquipment
+		newEquip   []mhfitem.MHFEquipment
+		wantMerged int
 	}{
 		{
-			name:        "merge_empty",
-			oldEquip:    []mhfitem.MHFEquipment{},
-			newEquip:    []mhfitem.MHFEquipment{},
-			wantMerged:  0,
+			name:       "merge_empty",
+			oldEquip:   []mhfitem.MHFEquipment{},
+			newEquip:   []mhfitem.MHFEquipment{},
+			wantMerged: 0,
 		},
 		{
 			name: "add_new_equipment",

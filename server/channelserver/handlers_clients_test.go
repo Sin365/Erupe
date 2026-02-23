@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	cfg "erupe-ce/config"
 	"erupe-ce/common/byteframe"
+	cfg "erupe-ce/config"
 	"erupe-ce/network/mhfpacket"
 	"go.uber.org/zap"
 )
@@ -13,12 +13,12 @@ import (
 // TestHandleMsgSysEnumerateClient tests client enumeration in stages
 func TestHandleMsgSysEnumerateClient(t *testing.T) {
 	tests := []struct {
-		name              string
-		stageID           string
-		getType           uint8
-		setupStage        func(*Server, string)
-		wantClientCount   int
-		wantFailure       bool
+		name            string
+		stageID         string
+		getType         uint8
+		setupStage      func(*Server, string)
+		wantClientCount int
+		wantFailure     bool
 	}{
 		{
 			name:    "enumerate_all_clients",

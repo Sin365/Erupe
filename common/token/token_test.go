@@ -118,7 +118,7 @@ func TestGenerate_Distribution(t *testing.T) {
 
 	// With 62 valid characters and 6200 samples, average should be 100 per char
 	// We'll accept a range to account for randomness
-	minExpected := 50  // Allow some variance
+	minExpected := 50 // Allow some variance
 	maxExpected := 150
 
 	for c, count := range charCount {

@@ -38,8 +38,8 @@ func (m *mockPacket) Parse(bf *byteframe.ByteFrame, ctx *clientctx.ClientContext
 func createMockServer() *Server {
 	logger, _ := zap.NewDevelopment()
 	s := &Server{
-		logger:       logger,
-		erupeConfig:  &cfg.Config{},
+		logger:      logger,
+		erupeConfig: &cfg.Config{},
 		// stages is a StageMap (zero value is ready to use)
 		sessions:     make(map[net.Conn]*Session),
 		handlerTable: buildHandlerTable(),

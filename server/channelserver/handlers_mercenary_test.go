@@ -86,9 +86,9 @@ func TestGetAirouDetails_Empty(t *testing.T) {
 
 func TestGetAirouDetails_SingleCat(t *testing.T) {
 	input := Airou{
-		ID:       42,
-		Name:     []byte("TestCat"),
-		Task: 4,
+		ID:          42,
+		Name:        []byte("TestCat"),
+		Task:        4,
 		Personality: 3,
 		Class:       2,
 		Experience:  1500,
@@ -175,16 +175,16 @@ func TestGetAirouDetails_ExtraTrailingBytes(t *testing.T) {
 
 	catBuf := new(bytes.Buffer)
 	_ = binary.Write(catBuf, binary.BigEndian, uint32(99))  // catID
-	catBuf.WriteByte(0)                                 // skip
-	catBuf.Write(make([]byte, 18))                      // name
-	catBuf.WriteByte(3)                                 // currentTask
-	catBuf.Write(make([]byte, 16))                      // appearance skip
-	catBuf.WriteByte(1)                                 // personality
-	catBuf.WriteByte(2)                                 // class
-	catBuf.Write(make([]byte, 5))                       // affection skip
+	catBuf.WriteByte(0)                                     // skip
+	catBuf.Write(make([]byte, 18))                          // name
+	catBuf.WriteByte(3)                                     // currentTask
+	catBuf.Write(make([]byte, 16))                          // appearance skip
+	catBuf.WriteByte(1)                                     // personality
+	catBuf.WriteByte(2)                                     // class
+	catBuf.Write(make([]byte, 5))                           // affection skip
 	_ = binary.Write(catBuf, binary.BigEndian, uint32(500)) // experience
-	catBuf.WriteByte(0)                                 // weapon equipped bool
-	catBuf.WriteByte(6)                                 // weaponType
+	catBuf.WriteByte(0)                                     // weapon equipped bool
+	catBuf.WriteByte(6)                                     // weaponType
 	_ = binary.Write(catBuf, binary.BigEndian, uint16(50))  // weaponID
 
 	catData := catBuf.Bytes()
@@ -238,8 +238,8 @@ func TestHandleMsgMhfMercenaryHuntdata_Unk0_1(t *testing.T) {
 	session := createMockSession(1, server)
 
 	pkt := &mhfpacket.MsgMhfMercenaryHuntdata{
-		AckHandle: 12345,
-		RequestType:      1,
+		AckHandle:   12345,
+		RequestType: 1,
 	}
 
 	handleMsgMhfMercenaryHuntdata(session, pkt)
@@ -260,8 +260,8 @@ func TestHandleMsgMhfMercenaryHuntdata_Unk0_0(t *testing.T) {
 	session := createMockSession(1, server)
 
 	pkt := &mhfpacket.MsgMhfMercenaryHuntdata{
-		AckHandle: 12345,
-		RequestType:      0,
+		AckHandle:   12345,
+		RequestType: 0,
 	}
 
 	handleMsgMhfMercenaryHuntdata(session, pkt)

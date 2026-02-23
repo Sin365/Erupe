@@ -154,7 +154,7 @@ func TestBroadcastTypes(t *testing.T) {
 				bf := byteframe.NewByteFrame()
 				bf.SetBE() // Targeted uses BE
 				msg := &binpacket.MsgBinTargeted{
-					TargetCharIDs: []uint32{1, 2, 3},
+					TargetCharIDs:  []uint32{1, 2, 3},
 					RawDataPayload: []byte{0xDE, 0xAD, 0xBE, 0xEF},
 				}
 				_ = msg.Build(bf)
@@ -218,8 +218,8 @@ func TestBroadcastTypes(t *testing.T) {
 // TestBinaryMessageTypes verifies different message types are handled
 func TestBinaryMessageTypes(t *testing.T) {
 	tests := []struct {
-		name        string
-		messageType uint8
+		name         string
+		messageType  uint8
 		buildPayload func() []byte
 	}{
 		{

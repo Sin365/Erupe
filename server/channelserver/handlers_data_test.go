@@ -125,19 +125,19 @@ func TestScenarioSaveErrorHandling(t *testing.T) {
 	// 3. The function should return early after sending fail ACK
 
 	tests := []struct {
-		name        string
+		name         string
 		scenarioData []byte
-		wantError   bool
+		wantError    bool
 	}{
 		{
-			name:        "valid_scenario_data",
+			name:         "valid_scenario_data",
 			scenarioData: []byte{0x01, 0x02, 0x03},
-			wantError:   false,
+			wantError:    false,
 		},
 		{
-			name:        "empty_scenario_data",
+			name:         "empty_scenario_data",
 			scenarioData: []byte{},
-			wantError:   false, // Empty data is valid
+			wantError:    false, // Empty data is valid
 		},
 	}
 

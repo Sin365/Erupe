@@ -10,8 +10,8 @@ import (
 
 // MsgMhfExchangeWeeklyStamp represents the MSG_MHF_EXCHANGE_WEEKLY_STAMP
 type MsgMhfExchangeWeeklyStamp struct {
-	AckHandle uint32
-	StampType string
+	AckHandle    uint32
+	StampType    string
 	ExchangeType uint8
 }
 

@@ -45,10 +45,10 @@ func TestUserGetItems_ParsesData(t *testing.T) {
 	bf.WriteUint16(1) // numStacks
 	bf.WriteUint16(0) // unused
 	// Item stack: warehouseID(4) + itemID(2) + quantity(2) + unk0(4) = 12 bytes
-	bf.WriteUint32(100)  // warehouseID
-	bf.WriteUint16(500)  // itemID
-	bf.WriteUint16(3)    // quantity
-	bf.WriteUint32(0)    // unk0
+	bf.WriteUint32(100) // warehouseID
+	bf.WriteUint16(500) // itemID
+	bf.WriteUint16(3)   // quantity
+	bf.WriteUint32(0)   // unk0
 
 	server := createMockServer()
 	userMock := &mockUserRepoForItems{itemBoxData: bf.Data()}

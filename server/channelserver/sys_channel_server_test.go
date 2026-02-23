@@ -36,9 +36,11 @@ func (m *mockConn) RemoteAddr() net.Addr {
 	return &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 12345}
 }
 
-func (m *mockConn) Read(b []byte) (n int, err error)   { return 0, nil }
-func (m *mockConn) Write(b []byte) (n int, err error)  { return len(b), nil }
-func (m *mockConn) LocalAddr() net.Addr                { return &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 54321} }
+func (m *mockConn) Read(b []byte) (n int, err error)  { return 0, nil }
+func (m *mockConn) Write(b []byte) (n int, err error) { return len(b), nil }
+func (m *mockConn) LocalAddr() net.Addr {
+	return &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 54321}
+}
 func (m *mockConn) SetDeadline(t time.Time) error      { return nil }
 func (m *mockConn) SetReadDeadline(t time.Time) error  { return nil }
 func (m *mockConn) SetWriteDeadline(t time.Time) error { return nil }
@@ -53,10 +55,10 @@ func (m *mockConn) WasClosed() bool {
 func createTestServer() *Server {
 	logger, _ := zap.NewDevelopment()
 	s := &Server{
-		ID:             1,
-		logger:         logger,
-		sessions:       make(map[net.Conn]*Session),
-		semaphore:      make(map[string]*Semaphore),
+		ID:         1,
+		logger:     logger,
+		sessions:   make(map[net.Conn]*Session),
+		semaphore:  make(map[string]*Semaphore),
 		questCache: NewQuestCache(0),
 		erupeConfig: &cfg.Config{
 			DebugOptions: cfg.DebugOptions{
@@ -79,15 +81,15 @@ func createTestServer() *Server {
 func createTestSessionForServer(server *Server, conn net.Conn, charID uint32, name string) *Session {
 	mock := &MockCryptConn{sentPackets: make([][]byte, 0)}
 	s := &Session{
-		logger:      server.logger,
-		server:      server,
-		rawConn:     conn,
-		cryptConn:   mock,
-		sendPackets: make(chan packet, 20),
+		logger:        server.logger,
+		server:        server,
+		rawConn:       conn,
+		cryptConn:     mock,
+		sendPackets:   make(chan packet, 20),
 		clientContext: &clientctx.ClientContext{},
-		lastPacket:  time.Now(),
-		charID:      charID,
-		Name:        name,
+		lastPacket:    time.Now(),
+		charID:        charID,
+		Name:          name,
 	}
 	return s
 }

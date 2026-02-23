@@ -54,10 +54,10 @@ func TestUTF8ToSJIS_RoundTrip(t *testing.T) {
 
 func TestToNGWord(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    string
-		minLen   int
-		checkFn  func(t *testing.T, result []uint16)
+		name    string
+		input   string
+		minLen  int
+		checkFn func(t *testing.T, result []uint16)
 	}{
 		{
 			name:   "ascii characters",
@@ -328,11 +328,11 @@ func TestCSVGetIndex(t *testing.T) {
 
 func TestCSVSetIndex(t *testing.T) {
 	tests := []struct {
-		name     string
-		csv      string
-		index    int
-		value    int
-		check    func(t *testing.T, result string)
+		name  string
+		csv   string
+		index int
+		value int
+		check func(t *testing.T, result string)
 	}{
 		{
 			name:  "set first",

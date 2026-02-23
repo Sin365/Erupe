@@ -17,7 +17,7 @@ func TestParseLargeMsgSysUpdateRightBuild(t *testing.T) {
 		ClientRespAckHandle: 0x12345678,
 		Bitfield:            0xDEADBEEF,
 		Rights:              nil,
-		TokenLength:             0,
+		TokenLength:         0,
 	}
 
 	bf := byteframe.NewByteFrame()
@@ -82,12 +82,12 @@ func TestParseLargeMsgMhfOperateWarehouse(t *testing.T) {
 // TestParseLargeMsgMhfOperateWarehouseEquip tests Parse for MsgMhfOperateWarehouse with equip box type.
 func TestParseLargeMsgMhfOperateWarehouseEquip(t *testing.T) {
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint32(42)  // AckHandle
-	bf.WriteUint8(2)    // Operation
-	bf.WriteUint8(1)    // BoxType = equip
-	bf.WriteUint8(0)    // BoxIndex
-	bf.WriteUint8(5)    // lenName
-	bf.WriteUint16(0)   // Unk
+	bf.WriteUint32(42) // AckHandle
+	bf.WriteUint8(2)   // Operation
+	bf.WriteUint8(1)   // BoxType = equip
+	bf.WriteUint8(0)   // BoxIndex
+	bf.WriteUint8(5)   // lenName
+	bf.WriteUint16(0)  // Unk
 	bf.WriteBytes([]byte("Arms"))
 	bf.WriteUint8(0) // null terminator
 	_, _ = bf.Seek(0, io.SeekStart)
@@ -126,7 +126,7 @@ func TestParseLargeMsgMhfLoadHouse(t *testing.T) {
 			bf.WriteUint32(tt.charID)
 			bf.WriteUint8(tt.destination)
 			bf.WriteBool(tt.checkPass)
-			bf.WriteUint16(0) // Unk (hardcoded 0)
+			bf.WriteUint16(0)                          // Unk (hardcoded 0)
 			bf.WriteUint8(uint8(len(tt.password) + 1)) // Password length
 			bf.WriteBytes([]byte(tt.password))
 			bf.WriteUint8(0) // null terminator
@@ -298,11 +298,11 @@ func TestParseLargeMsgMhfChargeFesta(t *testing.T) {
 // TestParseLargeMsgMhfChargeFestaZeroSouls tests Parse for MsgMhfChargeFesta with zero soul entries.
 func TestParseLargeMsgMhfChargeFestaZeroSouls(t *testing.T) {
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint32(1)   // AckHandle
-	bf.WriteUint32(0)   // FestaID
-	bf.WriteUint32(0)   // GuildID
-	bf.WriteUint16(0)   // soul count = 0
-	bf.WriteUint8(0)    // Unk
+	bf.WriteUint32(1) // AckHandle
+	bf.WriteUint32(0) // FestaID
+	bf.WriteUint32(0) // GuildID
+	bf.WriteUint16(0) // soul count = 0
+	bf.WriteUint8(0)  // Unk
 	_, _ = bf.Seek(0, io.SeekStart)
 
 	pkt := &MsgMhfChargeFesta{}
@@ -319,13 +319,13 @@ func TestParseLargeMsgMhfChargeFestaZeroSouls(t *testing.T) {
 // uint8 dataLen, 4 bytes Data1, dataLen bytes Data2.
 func TestParseLargeMsgMhfOperateJoint(t *testing.T) {
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint32(0x12345678)              // AckHandle
-	bf.WriteUint32(100)                     // AllianceID
-	bf.WriteUint32(200)                     // GuildID
-	bf.WriteUint8(0x01)                     // Action = OPERATE_JOINT_DISBAND
-	bf.WriteUint8(3)                        // dataLen = 3
+	bf.WriteUint32(0x12345678)                    // AckHandle
+	bf.WriteUint32(100)                           // AllianceID
+	bf.WriteUint32(200)                           // GuildID
+	bf.WriteUint8(0x01)                           // Action = OPERATE_JOINT_DISBAND
+	bf.WriteUint8(3)                              // dataLen = 3
 	bf.WriteBytes([]byte{0xAA, 0xBB, 0xCC, 0xDD}) // Data1 (always 4 bytes)
-	bf.WriteBytes([]byte{0x01, 0x02, 0x03})        // Data2 (dataLen bytes)
+	bf.WriteBytes([]byte{0x01, 0x02, 0x03})       // Data2 (dataLen bytes)
 	_, _ = bf.Seek(0, io.SeekStart)
 
 	pkt := &MsgMhfOperateJoint{}
@@ -394,12 +394,12 @@ func TestParseLargeMsgMhfSaveMercenary(t *testing.T) {
 	mercData := []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}
 
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint32(0xCAFEBABE) // AckHandle
-	bf.WriteUint32(0)          // lenData (skipped)
-	bf.WriteUint32(5000)       // GCP
-	bf.WriteUint32(42)         // PactMercID
+	bf.WriteUint32(0xCAFEBABE)            // AckHandle
+	bf.WriteUint32(0)                     // lenData (skipped)
+	bf.WriteUint32(5000)                  // GCP
+	bf.WriteUint32(42)                    // PactMercID
 	bf.WriteUint32(uint32(len(mercData))) // dataSize
-	bf.WriteUint32(0)          // Merc index (skipped)
+	bf.WriteUint32(0)                     // Merc index (skipped)
 	bf.WriteBytes(mercData)
 	_, _ = bf.Seek(0, io.SeekStart)
 
@@ -436,10 +436,10 @@ func TestParseLargeMsgMhfUpdateHouse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			bf := byteframe.NewByteFrame()
-			bf.WriteUint32(0x12345678) // AckHandle
-			bf.WriteUint8(tt.state)    // State
-			bf.WriteUint8(1)           // Unk1
-			bf.WriteUint16(0)          // Unk2
+			bf.WriteUint32(0x12345678)                 // AckHandle
+			bf.WriteUint8(tt.state)                    // State
+			bf.WriteUint8(1)                           // Unk1
+			bf.WriteUint16(0)                          // Unk2
 			bf.WriteUint8(uint8(len(tt.password) + 1)) // Password length
 			bf.WriteBytes([]byte(tt.password))
 			bf.WriteUint8(0) // null terminator
@@ -473,9 +473,9 @@ func TestParseLargeMsgSysCreateAcquireSemaphore(t *testing.T) {
 	copy(semBytes, semID)
 
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint32(0xDEADBEEF) // AckHandle
-	bf.WriteUint16(100)        // Unk0
-	bf.WriteUint8(4)           // PlayerCount
+	bf.WriteUint32(0xDEADBEEF)          // AckHandle
+	bf.WriteUint16(100)                 // Unk0
+	bf.WriteUint8(4)                    // PlayerCount
 	bf.WriteUint8(uint8(len(semBytes))) // SemaphoreIDLength
 	bf.WriteBytes(semBytes)
 	_, _ = bf.Seek(0, io.SeekStart)
@@ -504,12 +504,12 @@ func TestParseLargeMsgMhfOperateGuild(t *testing.T) {
 	dataPayload := []byte{0x10, 0x20, 0x30, 0x40, 0x50}
 
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint32(0xAABBCCDD)          // AckHandle
-	bf.WriteUint32(999)                 // GuildID
-	bf.WriteUint8(0x09)                 // Action = OperateGuildUpdateComment
-	bf.WriteUint8(uint8(len(dataPayload))) // dataLen
+	bf.WriteUint32(0xAABBCCDD)                    // AckHandle
+	bf.WriteUint32(999)                           // GuildID
+	bf.WriteUint8(0x09)                           // Action = OperateGuildUpdateComment
+	bf.WriteUint8(uint8(len(dataPayload)))        // dataLen
 	bf.WriteBytes([]byte{0x01, 0x02, 0x03, 0x04}) // Data1 (always 4 bytes)
-	bf.WriteBytes(dataPayload) // Data2 (dataLen bytes)
+	bf.WriteBytes(dataPayload)                    // Data2 (dataLen bytes)
 	_, _ = bf.Seek(0, io.SeekStart)
 
 	pkt := &MsgMhfOperateGuild{}
@@ -657,9 +657,9 @@ func TestParseLargeMsgSysLockGlobalSema(t *testing.T) {
 // TestParseLargeMsgMhfCreateJoint tests Parse for MsgMhfCreateJoint.
 func TestParseLargeMsgMhfCreateJoint(t *testing.T) {
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint32(0xCAFEBABE)     // AckHandle
-	bf.WriteUint32(500)            // GuildID
-	bf.WriteUint32(15)             // len (unused)
+	bf.WriteUint32(0xCAFEBABE) // AckHandle
+	bf.WriteUint32(500)        // GuildID
+	bf.WriteUint32(15)         // len (unused)
 	bf.WriteBytes([]byte("Alliance01"))
 	bf.WriteUint8(0) // null terminator
 	_, _ = bf.Seek(0, io.SeekStart)
@@ -858,8 +858,8 @@ func TestParseLargeMsgSysReserveStage(t *testing.T) {
 	copy(stageBytes, stageID)
 
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint32(0xAABBCCDD) // AckHandle
-	bf.WriteUint8(0x11)        // Ready
+	bf.WriteUint32(0xAABBCCDD)            // AckHandle
+	bf.WriteUint8(0x11)                   // Ready
 	bf.WriteUint8(uint8(len(stageBytes))) // stageIDLength
 	bf.WriteBytes(stageBytes)
 	_, _ = bf.Seek(0, io.SeekStart)

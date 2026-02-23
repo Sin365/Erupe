@@ -208,4 +208,3 @@ func TestUpdateRights_Error(t *testing.T) {
 		t.Fatal("updateRights should queue a packet even on error")
 	}
 }
-

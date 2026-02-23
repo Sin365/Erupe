@@ -2,10 +2,10 @@ package signserver
 
 import (
 	"erupe-ce/common/byteframe"
+	"erupe-ce/common/gametime"
 	ps "erupe-ce/common/pascalstring"
 	"erupe-ce/common/stringsupport"
 	cfg "erupe-ce/config"
-	"erupe-ce/common/gametime"
 	"fmt"
 	"strings"
 	"time"

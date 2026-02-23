@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	cfg "erupe-ce/config"
 	"erupe-ce/common/gametime"
+	cfg "erupe-ce/config"
 	"go.uber.org/zap"
 )
 
@@ -150,9 +150,9 @@ func TestLoginEndpointEmptyCredentials(t *testing.T) {
 	}
 
 	tests := []struct {
-		name     string
-		username string
-		password string
+		name      string
+		username  string
+		password  string
 		wantPanic bool // Note: will panic without real DB
 	}{
 		{"EmptyUsername", "", "password", true},

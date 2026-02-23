@@ -73,10 +73,10 @@ func TestBackportQuestBasic(t *testing.T) {
 // TestFindSubSliceIndices tests byte slice pattern finding
 func TestFindSubSliceIndices(t *testing.T) {
 	tests := []struct {
-		name        string
-		data        []byte
-		pattern     []byte
-		expected    int
+		name     string
+		data     []byte
+		pattern  []byte
+		expected int
 	}{
 		{
 			name:     "single_match",
@@ -213,9 +213,9 @@ func TestEnumerateQuestBasicStructure(t *testing.T) {
 	bf := byteframe.NewByteFrame()
 
 	// Build a minimal response structure
-	bf.WriteUint16(0)      // Returned count
+	bf.WriteUint16(0)                                  // Returned count
 	bf.WriteUint16(uint16(time.Now().Unix() & 0xFFFF)) // Unix timestamp offset
-	bf.WriteUint16(0)      // Tune values count
+	bf.WriteUint16(0)                                  // Tune values count
 
 	data := bf.Data()
 
@@ -301,12 +301,12 @@ func TestEnumerateQuestTuneValuesEncoding(t *testing.T) {
 // TestEventQuestCycleCalculation tests event quest cycle calculations
 func TestEventQuestCycleCalculation(t *testing.T) {
 	tests := []struct {
-		name             string
-		startTime        time.Time
-		activeDays       int
-		inactiveDays     int
-		currentTime      time.Time
-		shouldBeActive   bool
+		name           string
+		startTime      time.Time
+		activeDays     int
+		inactiveDays   int
+		currentTime    time.Time
+		shouldBeActive bool
 	}{
 		{
 			name:           "active_period",
@@ -409,8 +409,8 @@ func TestMakeEventQuestPacketStructure(t *testing.T) {
 	questType := uint8(16)
 
 	bf.WriteUint32(questID)
-	bf.WriteUint32(0)  // Unk
-	bf.WriteUint8(0)   // Unk
+	bf.WriteUint32(0) // Unk
+	bf.WriteUint8(0)  // Unk
 	bf.WriteUint8(maxPlayers)
 	bf.WriteUint8(questType)
 	bf.WriteBool(true) // Multi-player
@@ -626,13 +626,13 @@ func TestGetUdBonusQuestInfoStructure(t *testing.T) {
 	bf.SetLE()
 
 	// Example UD bonus quest info entry
-	bf.WriteUint8(0)              // Unk0
-	bf.WriteUint8(0)              // Unk1
-	bf.WriteUint32(uint32(time.Now().Unix())) // StartTime
-	bf.WriteUint32(uint32(time.Now().Add(30*24*time.Hour).Unix())) // EndTime
-	bf.WriteUint32(0)             // Unk4
-	bf.WriteUint8(0)              // Unk5
-	bf.WriteUint8(0)              // Unk6
+	bf.WriteUint8(0)                                                   // Unk0
+	bf.WriteUint8(0)                                                   // Unk1
+	bf.WriteUint32(uint32(time.Now().Unix()))                          // StartTime
+	bf.WriteUint32(uint32(time.Now().Add(30 * 24 * time.Hour).Unix())) // EndTime
+	bf.WriteUint32(0)                                                  // Unk4
+	bf.WriteUint8(0)                                                   // Unk5
+	bf.WriteUint8(0)                                                   // Unk6
 
 	data := bf.Data()
 
@@ -646,8 +646,8 @@ func TestGetUdBonusQuestInfoStructure(t *testing.T) {
 	bf2 := byteframe.NewByteFrameFromBytes(data)
 	bf2.SetLE()
 
-	bf2.ReadUint8()  // Unk0
-	bf2.ReadUint8()  // Unk1
+	bf2.ReadUint8() // Unk0
+	bf2.ReadUint8() // Unk1
 	startTime := bf2.ReadUint32()
 	endTime := bf2.ReadUint32()
 	bf2.ReadUint32() // Unk4
@@ -665,9 +665,9 @@ func BenchmarkQuestEnumeration(b *testing.B) {
 		bf := byteframe.NewByteFrame()
 
 		// Build a response with tune values
-		bf.WriteUint16(0)      // Returned count
+		bf.WriteUint16(0) // Returned count
 		bf.WriteUint16(uint16(time.Now().Unix() & 0xFFFF))
-		bf.WriteUint16(100)    // 100 tune values
+		bf.WriteUint16(100) // 100 tune values
 
 		for j := 0; j < 100; j++ {
 			bf.WriteUint16(uint16(j))

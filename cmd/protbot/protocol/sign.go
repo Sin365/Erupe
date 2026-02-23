@@ -11,11 +11,11 @@ import (
 
 // SignResult holds the parsed response from a successful DSGN sign-in.
 type SignResult struct {
-	TokenID     uint32
-	TokenString string // 16 raw bytes as string
-	Timestamp   uint32
+	TokenID      uint32
+	TokenString  string // 16 raw bytes as string
+	Timestamp    uint32
 	EntranceAddr string
-	CharIDs     []uint32
+	CharIDs      []uint32
 }
 
 // DoSign connects to the sign server and performs a DSGN login.
@@ -62,9 +62,9 @@ func parseSignResponse(data []byte) (*SignResult, error) {
 		return nil, fmt.Errorf("sign failed with code %d", resultCode)
 	}
 
-	patchCount := rbf.ReadUint8()    // patch server count (usually 2)
-	_ = rbf.ReadUint8()              // entrance server count (usually 1)
-	charCount := rbf.ReadUint8()     // character count
+	patchCount := rbf.ReadUint8() // patch server count (usually 2)
+	_ = rbf.ReadUint8()           // entrance server count (usually 1)
+	charCount := rbf.ReadUint8()  // character count
 
 	result := &SignResult{}
 	result.TokenID = rbf.ReadUint32()
@@ -87,13 +87,13 @@ func parseSignResponse(data []byte) (*SignResult, error) {
 		charID := rbf.ReadUint32()
 		result.CharIDs = append(result.CharIDs, charID)
 
-		_ = rbf.ReadUint16() // HR
-		_ = rbf.ReadUint16() // WeaponType
-		_ = rbf.ReadUint32() // LastLogin
-		_ = rbf.ReadUint8()  // IsFemale
-		_ = rbf.ReadUint8()  // IsNewCharacter
-		_ = rbf.ReadUint8()  // Old GR
-		_ = rbf.ReadUint8()  // Use uint16 GR flag
+		_ = rbf.ReadUint16()  // HR
+		_ = rbf.ReadUint16()  // WeaponType
+		_ = rbf.ReadUint32()  // LastLogin
+		_ = rbf.ReadUint8()   // IsFemale
+		_ = rbf.ReadUint8()   // IsNewCharacter
+		_ = rbf.ReadUint8()   // Old GR
+		_ = rbf.ReadUint8()   // Use uint16 GR flag
 		_ = rbf.ReadBytes(16) // Character name (padded)
 		_ = rbf.ReadBytes(32) // Unk desc string (padded)
 		// ZZ mode: additional fields

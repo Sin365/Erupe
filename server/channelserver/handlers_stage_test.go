@@ -18,7 +18,6 @@ func TestCreateStageSuccess(t *testing.T) {
 	mock := &MockCryptConn{sentPackets: make([][]byte, 0)}
 	s := createTestSession(mock)
 
-
 	// Create a new stage
 	pkt := &mhfpacket.MsgSysCreateStage{
 		StageID:     "test_stage_1",
@@ -45,7 +44,6 @@ func TestCreateStageSuccess(t *testing.T) {
 func TestCreateStageDuplicate(t *testing.T) {
 	mock := &MockCryptConn{sentPackets: make([][]byte, 0)}
 	s := createTestSession(mock)
-
 
 	// Create first stage
 	pkt1 := &mhfpacket.MsgSysCreateStage{
@@ -76,7 +74,6 @@ func TestStageLocking(t *testing.T) {
 	mock := &MockCryptConn{sentPackets: make([][]byte, 0)}
 	s := createTestSession(mock)
 
-
 	// Create a stage
 	stage := NewStage("locked_stage")
 	stage.host = s
@@ -104,7 +101,6 @@ func TestStageLocking(t *testing.T) {
 func TestStageReservation(t *testing.T) {
 	mock := &MockCryptConn{sentPackets: make([][]byte, 0)}
 	s := createTestSession(mock)
-
 
 	// Create a stage
 	stage := NewStage("reserved_stage")
@@ -164,7 +160,7 @@ func TestStageBinaryData(t *testing.T) {
 			stage := NewStage("binary_stage")
 			stage.rawBinaryData = make(map[stageBinaryKey][]byte)
 			s.stage = stage
-		
+
 			s.server.stages.Store("binary_stage", stage)
 
 			// Store binary data directly
@@ -231,7 +227,6 @@ func TestIsStageFull(t *testing.T) {
 				stage.clients[client] = uint32(i)
 			}
 
-		
 			s.server.stages.Store("full_test_stage", stage)
 
 			result := isStageFull(s, "full_test_stage")
@@ -302,7 +297,6 @@ func TestRemoveSessionFromStage(t *testing.T) {
 func TestDestructEmptyStages(t *testing.T) {
 	mock := &MockCryptConn{sentPackets: make([][]byte, 0)}
 	s := createTestSession(mock)
-
 
 	// Create stages with different client counts
 	emptyStage := NewStage("empty_stage")
@@ -422,7 +416,6 @@ func TestMoveStagePreservesData(t *testing.T) {
 func TestConcurrentStageOperations(t *testing.T) {
 	mock := &MockCryptConn{sentPackets: make([][]byte, 0)}
 	baseSession := createTestSession(mock)
-
 
 	// Create a stage
 	stage := NewStage("concurrent_stage")

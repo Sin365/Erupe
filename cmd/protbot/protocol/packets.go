@@ -48,8 +48,8 @@ func BuildEnumerateStagePacket(ackHandle uint32, prefix string) []byte {
 	bf := byteframe.NewByteFrame()
 	bf.WriteUint16(MSG_SYS_ENUMERATE_STAGE)
 	bf.WriteUint32(ackHandle)
-	bf.WriteUint8(1)                         // Always 1
-	bf.WriteUint8(uint8(len(prefix) + 1))    // Length including null terminator
+	bf.WriteUint8(1)                      // Always 1
+	bf.WriteUint8(uint8(len(prefix) + 1)) // Length including null terminator
 	bf.WriteNullTerminatedBytes([]byte(prefix))
 	bf.WriteBytes([]byte{0x00, 0x10})
 	return bf.Data()
@@ -68,8 +68,8 @@ func BuildEnterStagePacket(ackHandle uint32, stageID string) []byte {
 	bf := byteframe.NewByteFrame()
 	bf.WriteUint16(MSG_SYS_ENTER_STAGE)
 	bf.WriteUint32(ackHandle)
-	bf.WriteUint8(0)                          // IsQuest = false
-	bf.WriteUint8(uint8(len(stageID) + 1))    // Length including null terminator
+	bf.WriteUint8(0)                       // IsQuest = false
+	bf.WriteUint8(uint8(len(stageID) + 1)) // Length including null terminator
 	bf.WriteNullTerminatedBytes([]byte(stageID))
 	bf.WriteBytes([]byte{0x00, 0x10})
 	return bf.Data()
@@ -182,13 +182,13 @@ func BuildChatPayload(chatType uint8, message, senderName string) []byte {
 	sjisMsg := stringsupport.UTF8ToSJIS(message)
 	sjisName := stringsupport.UTF8ToSJIS(senderName)
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint8(0)                              // Unk0
-	bf.WriteUint8(chatType)                       // Type
-	bf.WriteUint16(0)                             // Flags
-	bf.WriteUint16(uint16(len(sjisName) + 1))     // SenderName length (+ null term)
-	bf.WriteUint16(uint16(len(sjisMsg) + 1))      // Message length (+ null term)
-	bf.WriteNullTerminatedBytes(sjisMsg)           // Message
-	bf.WriteNullTerminatedBytes(sjisName)          // SenderName
+	bf.WriteUint8(0)                          // Unk0
+	bf.WriteUint8(chatType)                   // Type
+	bf.WriteUint16(0)                         // Flags
+	bf.WriteUint16(uint16(len(sjisName) + 1)) // SenderName length (+ null term)
+	bf.WriteUint16(uint16(len(sjisMsg) + 1))  // Message length (+ null term)
+	bf.WriteNullTerminatedBytes(sjisMsg)      // Message
+	bf.WriteNullTerminatedBytes(sjisName)     // SenderName
 	return bf.Data()
 }
 

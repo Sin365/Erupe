@@ -1256,4 +1256,3 @@ func TestParseChatCommand_UnknownCommand(t *testing.T) {
 		t.Errorf("chat responses = %d, want 0 (unknown command is silent)", n)
 	}
 }
-

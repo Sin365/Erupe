@@ -9,6 +9,6 @@ const (
 
 // Raviente semaphore constants
 const (
-	raviSemaphoreStride = 0x10000    // ID spacing between hs_l0* semaphores
+	raviSemaphoreStride = 0x10000     // ID spacing between hs_l0* semaphores
 	raviSemaphoreMax    = uint16(127) // max players per Raviente semaphore
 )

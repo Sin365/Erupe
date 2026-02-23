@@ -10,7 +10,7 @@ import (
 
 // MsgMhfInfoTournament represents the MSG_MHF_INFO_TOURNAMENT
 type MsgMhfInfoTournament struct {
-	AckHandle uint32
+	AckHandle    uint32
 	QueryType    uint8
 	TournamentID uint32
 }

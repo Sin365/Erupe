@@ -196,12 +196,12 @@ func TestBatchParseMultiField(t *testing.T) {
 
 	t.Run("MsgMhfRegisterEvent", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1) // AckHandle
-		bf.WriteUint16(2) // Unk0
-		bf.WriteUint16(3) // WorldID
-		bf.WriteUint16(4) // LandID
+		bf.WriteUint32(1)  // AckHandle
+		bf.WriteUint16(2)  // Unk0
+		bf.WriteUint16(3)  // WorldID
+		bf.WriteUint16(4)  // LandID
 		bf.WriteBool(true) // Unk1
-		bf.WriteUint8(0)  // Zeroed (discarded)
+		bf.WriteUint8(0)   // Zeroed (discarded)
 		_, _ = bf.Seek(0, io.SeekStart)
 		pkt := &MsgMhfRegisterEvent{}
 		if err := pkt.Parse(bf, ctx); err != nil {
@@ -339,15 +339,15 @@ func TestBatchParseMultiField(t *testing.T) {
 
 	t.Run("MsgMhfPresentBox", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1) // AckHandle
-		bf.WriteUint32(2) // Unk0
-		bf.WriteUint32(3) // Unk1
-		bf.WriteUint32(2) // Unk2 (controls Unk7 slice length)
-		bf.WriteUint32(5) // Unk3
-		bf.WriteUint32(6) // Unk4
-		bf.WriteUint32(7) // Unk5
-		bf.WriteUint32(8) // Unk6
-		bf.WriteUint32(9) // Unk7[0]
+		bf.WriteUint32(1)  // AckHandle
+		bf.WriteUint32(2)  // Unk0
+		bf.WriteUint32(3)  // Unk1
+		bf.WriteUint32(2)  // Unk2 (controls Unk7 slice length)
+		bf.WriteUint32(5)  // Unk3
+		bf.WriteUint32(6)  // Unk4
+		bf.WriteUint32(7)  // Unk5
+		bf.WriteUint32(8)  // Unk6
+		bf.WriteUint32(9)  // Unk7[0]
 		bf.WriteUint32(10) // Unk7[1]
 		_, _ = bf.Seek(0, io.SeekStart)
 		pkt := &MsgMhfPresentBox{}
@@ -1963,9 +1963,9 @@ func TestBatchParseAdditionalMultiField(t *testing.T) {
 
 	t.Run("MsgMhfApplyCampaign", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1)              // AckHandle
-		bf.WriteUint32(1)              // Unk0
-		bf.WriteUint16(2)              // Unk1
+		bf.WriteUint32(1)               // AckHandle
+		bf.WriteUint32(1)               // Unk0
+		bf.WriteUint16(2)               // Unk1
 		bf.WriteBytes(make([]byte, 16)) // Unk2 (16 bytes)
 		_, _ = bf.Seek(0, io.SeekStart)
 		pkt := &MsgMhfApplyCampaign{}

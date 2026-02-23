@@ -413,7 +413,6 @@ func TestParseMediumUpdateMyhouseInfo(t *testing.T) {
 	})
 }
 
-
 // --- 3-stmt packets (AckHandle-only Parse) ---
 
 // TestParseMediumAckHandleOnlyBatch tests Parse for all 3-stmt packets that only

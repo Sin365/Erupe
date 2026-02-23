@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	cfg "erupe-ce/config"
 	"erupe-ce/common/mhfitem"
+	cfg "erupe-ce/config"
 	"erupe-ce/network/mhfpacket"
 	"erupe-ce/server/channelserver/compression/nullcomp"
 )
@@ -263,7 +263,7 @@ func TestSaveLoad_CurrentEquipment(t *testing.T) {
 	copy(saveData[88:], []byte("TestChar\x00"))
 
 	// Set weapon type at known offset (simplified)
-	weaponTypeOffset := 500 // Example offset
+	weaponTypeOffset := 500           // Example offset
 	saveData[weaponTypeOffset] = 0x03 // Great Sword
 
 	compressed, err := nullcomp.Compress(saveData)
@@ -377,10 +377,10 @@ func TestSaveLoad_Transmog(t *testing.T) {
 	setSize := 76 // G10+
 	numSets := 1
 	transmogData := make([]byte, 2+numSets*(2+setSize))
-	transmogData[0] = 1           // version
+	transmogData[0] = 1             // version
 	transmogData[1] = byte(numSets) // count
-	transmogData[2] = 0           // index high byte
-	transmogData[3] = 1           // index low byte (set #1)
+	transmogData[2] = 0             // index high byte
+	transmogData[3] = 1             // index low byte (set #1)
 
 	// Save transmog data
 	pkt := &mhfpacket.MsgMhfSaveDecoMyset{

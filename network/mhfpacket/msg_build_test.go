@@ -361,7 +361,7 @@ func TestBuildParseUpdateObjectBinary(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			original := &MsgSysUpdateObjectBinary{
 				ObjectHandleID: tt.unk0,
-				Unk1: tt.unk1,
+				Unk1:           tt.unk1,
 			}
 
 			bf := byteframe.NewByteFrame()
@@ -768,7 +768,7 @@ func TestBuildParseEnumerateDistItem(t *testing.T) {
 				AckHandle: tt.ackHandle,
 				DistType:  tt.distType,
 				Unk1:      tt.unk1,
-				MaxCount:      tt.unk2,
+				MaxCount:  tt.unk2,
 			}
 
 			bf := byteframe.NewByteFrame()

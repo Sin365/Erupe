@@ -124,6 +124,7 @@ func (bot *DiscordBot) RealtimeChannelSend(message string) (err error) {
 
 	return
 }
+
 // ReplaceTextAll replaces every match of regex in text by calling handler with
 // the first capture group of each match and substituting the result.
 func ReplaceTextAll(text string, regex *regexp.Regexp, handler func(input string) string) string {

@@ -57,7 +57,7 @@ func ListenChat(ch *protocol.ChannelConn, cb ChatCallback) {
 
 		// Parse MsgBinChat inner payload.
 		pbf := byteframe.NewByteFrameFromBytes(payload)
-		_ = pbf.ReadUint8()  // unk0
+		_ = pbf.ReadUint8() // unk0
 		chatType := pbf.ReadUint8()
 		_ = pbf.ReadUint16() // flags
 		_ = pbf.ReadUint16() // senderNameLen

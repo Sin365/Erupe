@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	cfg "erupe-ce/config"
 	"erupe-ce/common/mhfitem"
+	cfg "erupe-ce/config"
 	"erupe-ce/network/clientctx"
 	"erupe-ce/network/mhfpacket"
 	"erupe-ce/server/channelserver/compression/nullcomp"
@@ -18,9 +18,9 @@ import (
 // ============================================================================
 // SESSION LIFECYCLE INTEGRATION TESTS
 // Full end-to-end tests that simulate the complete player session lifecycle
-// 
+//
 // These tests address the core issue: handler-level tests don't catch problems
-// with the logout flow. Players report data loss because logout doesn't 
+// with the logout flow. Players report data loss because logout doesn't
 // trigger save handlers.
 //
 // Test Strategy:
@@ -580,16 +580,16 @@ func createTestServerWithDB(t *testing.T, db *sqlx.DB) *Server {
 	// Create minimal server for testing
 	// Note: This may need adjustment based on actual Server initialization
 	server := &Server{
-		db:              db,
-		sessions:        make(map[net.Conn]*Session),
+		db:         db,
+		sessions:   make(map[net.Conn]*Session),
 		userBinary: NewUserBinaryStore(),
 		minidata:   NewMinidataStore(),
-		semaphore:       make(map[string]*Semaphore),
+		semaphore:  make(map[string]*Semaphore),
 		erupeConfig: &cfg.Config{
 			RealClientMode: cfg.ZZ,
 		},
-		isShuttingDown:  false,
-		done:            make(chan struct{}),
+		isShuttingDown: false,
+		done:           make(chan struct{}),
 	}
 
 	// Create logger
@@ -617,7 +617,7 @@ func createTestServerWithDB(t *testing.T, db *sqlx.DB) *Server {
 func createTestSessionForServerWithChar(server *Server, charID uint32, name string) *Session {
 	mock := &MockCryptConn{sentPackets: make([][]byte, 0)}
 	mockNetConn := NewMockNetConn() // Create a mock net.Conn for the session map key
-	
+
 	session := &Session{
 		logger:        server.logger,
 		server:        server,
@@ -638,4 +638,3 @@ func createTestSessionForServerWithChar(server *Server, charID uint32, name stri
 
 	return session
 }
-

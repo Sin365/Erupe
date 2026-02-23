@@ -35,9 +35,9 @@ func handleMsgSysCastBinary(s *Session, p mhfpacket.MHFPacket) {
 	tmp := byteframe.NewByteFrameFromBytes(pkt.RawDataPayload)
 
 	const (
-		timerPayloadSize = 0x10         // expected payload length for timer packets
+		timerPayloadSize = 0x10           // expected payload length for timer packets
 		timerSubtype     = uint16(0x0002) // timer data subtype identifier
-		timerFlag        = uint8(0x18)   // timer flag byte
+		timerFlag        = uint8(0x18)    // timer flag byte
 	)
 	if pkt.BroadcastType == BroadcastTypeStage && pkt.MessageType == BinaryMessageTypeData && len(pkt.RawDataPayload) == timerPayloadSize {
 		if tmp.ReadUint16() == timerSubtype && tmp.ReadUint8() == timerFlag {

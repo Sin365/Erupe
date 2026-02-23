@@ -599,9 +599,9 @@ func newNullTermBF(data []byte) *byteframe.ByteFrame {
 
 func newMottoBF(sub, main uint8) *byteframe.ByteFrame {
 	bf := byteframe.NewByteFrame()
-	bf.WriteUint16(0)    // skipped
-	bf.WriteUint8(sub)   // SubMotto
-	bf.WriteUint8(main)  // MainMotto
+	bf.WriteUint16(0)   // skipped
+	bf.WriteUint8(sub)  // SubMotto
+	bf.WriteUint8(main) // MainMotto
 	_, _ = bf.Seek(0, 0)
 	return bf
 }

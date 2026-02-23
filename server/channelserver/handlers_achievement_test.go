@@ -297,9 +297,9 @@ func TestGetAchData_Level7SilverTrophy(t *testing.T) {
 // produces the correct gold trophy and the last threshold as Required/Progress.
 func TestGetAchData_MaxedOut_AllCurves(t *testing.T) {
 	tests := []struct {
-		name     string
-		id       uint8
-		score    int32
+		name       string
+		id         uint8
+		score      int32
 		lastThresh int32
 	}{
 		// Curve 0: {5,15,30,50,100,150,200,300} sum=850, last=300
@@ -383,11 +383,11 @@ func TestGetAchData_Curve2_FestaWins(t *testing.T) {
 		wantReq  uint32
 	}{
 		{0, 0, 0, 1},
-		{1, 1, 0, 2},       // Exactly at first threshold
-		{2, 1, 1, 2},       // One into second threshold
-		{3, 2, 0, 3},       // Exactly at second cumulative
-		{36, 8, 8, 8},      // Max level (sum of all thresholds)
-		{100, 8, 8, 8},     // Well above max
+		{1, 1, 0, 2},   // Exactly at first threshold
+		{2, 1, 1, 2},   // One into second threshold
+		{3, 2, 0, 3},   // Exactly at second cumulative
+		{36, 8, 8, 8},  // Max level (sum of all thresholds)
+		{100, 8, 8, 8}, // Well above max
 	}
 
 	for _, tt := range tests {

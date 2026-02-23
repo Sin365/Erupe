@@ -19,22 +19,22 @@ func IntegrationTest_PacketQueueFlow(t *testing.T) {
 	}
 
 	tests := []struct {
-		name         string
-		packetCount  int
-		queueDelay   time.Duration
-		wantPackets  int
+		name        string
+		packetCount int
+		queueDelay  time.Duration
+		wantPackets int
 	}{
 		{
-			name:         "sequential_packets",
-			packetCount:  10,
-			queueDelay:   10 * time.Millisecond,
-			wantPackets:  10,
+			name:        "sequential_packets",
+			packetCount: 10,
+			queueDelay:  10 * time.Millisecond,
+			wantPackets: 10,
 		},
 		{
-			name:         "rapid_fire_packets",
-			packetCount:  50,
-			queueDelay:   1 * time.Millisecond,
-			wantPackets:  50,
+			name:        "rapid_fire_packets",
+			packetCount: 50,
+			queueDelay:  1 * time.Millisecond,
+			wantPackets: 50,
 		},
 	}
 
@@ -44,7 +44,7 @@ func IntegrationTest_PacketQueueFlow(t *testing.T) {
 
 			s := &Session{
 				sendPackets: make(chan packet, 100),
-					server: &Server{
+				server: &Server{
 					erupeConfig: &cfg.Config{
 						DebugOptions: cfg.DebugOptions{
 							LogOutboundMessages: false,
@@ -126,7 +126,7 @@ func IntegrationTest_ConcurrentQueueing(t *testing.T) {
 			},
 		},
 	}
-		s.cryptConn = mock
+	s.cryptConn = mock
 
 	go s.sendLoop()
 
@@ -224,7 +224,7 @@ func IntegrationTest_AckPacketFlow(t *testing.T) {
 			},
 		},
 	}
-		s.cryptConn = mock
+	s.cryptConn = mock
 
 	go s.sendLoop()
 
@@ -289,7 +289,7 @@ func IntegrationTest_MixedPacketTypes(t *testing.T) {
 			},
 		},
 	}
-		s.cryptConn = mock
+	s.cryptConn = mock
 
 	go s.sendLoop()
 
@@ -345,7 +345,7 @@ func IntegrationTest_PacketOrderPreservation(t *testing.T) {
 			},
 		},
 	}
-		s.cryptConn = mock
+	s.cryptConn = mock
 
 	go s.sendLoop()
 
@@ -403,7 +403,7 @@ func IntegrationTest_QueueBackpressure(t *testing.T) {
 			},
 		},
 	}
-		s.cryptConn = mock
+	s.cryptConn = mock
 
 	go s.sendLoop()
 
@@ -443,10 +443,10 @@ func IntegrationTest_GuildEnumerationFlow(t *testing.T) {
 	}
 
 	tests := []struct {
-		name         string
-		guildCount   int
+		name            string
+		guildCount      int
 		membersPerGuild int
-		wantValid    bool
+		wantValid       bool
 	}{
 		{
 			name:            "single_guild",
@@ -530,22 +530,22 @@ func IntegrationTest_ConcurrentClientAccess(t *testing.T) {
 	}
 
 	tests := []struct {
-		name            string
+		name              string
 		concurrentClients int
 		packetsPerClient  int
 		wantTotalPackets  int
 	}{
 		{
-			name:             "two_concurrent_clients",
+			name:              "two_concurrent_clients",
 			concurrentClients: 2,
 			packetsPerClient:  5,
-			wantTotalPackets: 10,
+			wantTotalPackets:  10,
 		},
 		{
-			name:             "five_concurrent_clients",
+			name:              "five_concurrent_clients",
 			concurrentClients: 5,
 			packetsPerClient:  10,
-			wantTotalPackets: 50,
+			wantTotalPackets:  50,
 		},
 	}
 

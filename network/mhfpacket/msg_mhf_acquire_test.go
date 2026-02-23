@@ -86,7 +86,7 @@ func TestMsgMhfAcquireTitleParse(t *testing.T) {
 			bf := byteframe.NewByteFrame()
 			bf.WriteUint32(tt.ackHandle)
 			bf.WriteUint16(uint16(len(tt.titleIDs))) // count
-			bf.WriteUint16(0)                         // zeroed
+			bf.WriteUint16(0)                        // zeroed
 			for _, id := range tt.titleIDs {
 				bf.WriteUint16(id)
 			}

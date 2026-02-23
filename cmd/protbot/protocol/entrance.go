@@ -12,9 +12,9 @@ import (
 
 // ServerEntry represents a channel server from the entrance server response.
 type ServerEntry struct {
-	IP       string
-	Port     uint16
-	Name     string
+	IP   string
+	Port uint16
+	Name string
 }
 
 // DoEntrance connects to the entrance server and retrieves the server list.
@@ -93,8 +93,8 @@ func parseServerEntries(data []byte, entryCount uint16) ([]ServerEntry, error) {
 		_ = bf.ReadUint16() // serverIdx | 16
 		_ = bf.ReadUint16() // 0
 		channelCount := bf.ReadUint16()
-		_ = bf.ReadUint8()  // Type
-		_ = bf.ReadUint8()  // Season/rotation
+		_ = bf.ReadUint8() // Type
+		_ = bf.ReadUint8() // Season/rotation
 
 		// G1+ recommended flag
 		_ = bf.ReadUint8()
@@ -118,11 +118,11 @@ func parseServerEntries(data []byte, entryCount uint16) ([]ServerEntry, error) {
 		// Read channel entries (14 x uint16 = 28 bytes each)
 		for j := uint16(0); j < channelCount; j++ {
 			port := bf.ReadUint16()
-			_ = bf.ReadUint16() // channelIdx | 16
-			_ = bf.ReadUint16() // maxPlayers
-			_ = bf.ReadUint16() // currentPlayers
+			_ = bf.ReadUint16()  // channelIdx | 16
+			_ = bf.ReadUint16()  // maxPlayers
+			_ = bf.ReadUint16()  // currentPlayers
 			_ = bf.ReadBytes(18) // remaining channel fields (9 x uint16: 6 zeros + unk319 + unk254 + unk255)
-			_ = bf.ReadUint16() // 12345
+			_ = bf.ReadUint16()  // 12345
 
 			serverIP := ip.String()
 			// Convert 127.0.0.1 representation

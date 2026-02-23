@@ -13,10 +13,10 @@ import (
 
 // Diva Defense event duration constants (all values in seconds)
 const (
-	divaPhaseDuration = 601200  // 6d 23h = first song phase
-	divaInterlude     = 3900    // 65 min = gap between phases
+	divaPhaseDuration = 601200      // 6d 23h = first song phase
+	divaInterlude     = 3900        // 65 min = gap between phases
 	divaWeekDuration  = secsPerWeek // 7 days = subsequent phase length
-	divaTotalLifespan = 2977200 // ~34.5 days = full event window
+	divaTotalLifespan = 2977200     // ~34.5 days = full event window
 )
 
 func cleanupDiva(s *Session) {

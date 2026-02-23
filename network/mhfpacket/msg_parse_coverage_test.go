@@ -80,9 +80,9 @@ func TestParseCoverage_VariableLength(t *testing.T) {
 
 	t.Run("MsgMhfAcquireItem_EmptyList", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1)  // AckHandle
-		bf.WriteUint16(0)  // Unk0
-		bf.WriteUint16(0)  // Length = 0 items
+		bf.WriteUint32(1) // AckHandle
+		bf.WriteUint16(0) // Unk0
+		bf.WriteUint16(0) // Length = 0 items
 		pkt := &MsgMhfAcquireItem{}
 		parsed := byteframe.NewByteFrameFromBytes(bf.Data())
 		if err := pkt.Parse(parsed, ctx); err != nil {
@@ -92,9 +92,9 @@ func TestParseCoverage_VariableLength(t *testing.T) {
 
 	t.Run("MsgMhfAcquireItem_WithItems", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1)  // AckHandle
-		bf.WriteUint16(0)  // Unk0
-		bf.WriteUint16(2)  // Length = 2 items
+		bf.WriteUint32(1)   // AckHandle
+		bf.WriteUint16(0)   // Unk0
+		bf.WriteUint16(2)   // Length = 2 items
 		bf.WriteUint32(100) // item 1
 		bf.WriteUint32(200) // item 2
 		pkt := &MsgMhfAcquireItem{}
@@ -127,8 +127,8 @@ func TestParseCoverage_VariableLength(t *testing.T) {
 
 	t.Run("MsgSysRightsReload", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1) // AckHandle
-		bf.WriteUint8(3)  // length
+		bf.WriteUint32(1)                       // AckHandle
+		bf.WriteUint8(3)                        // length
 		bf.WriteBytes([]byte{0x01, 0x02, 0x03}) // Unk0
 		pkt := &MsgSysRightsReload{}
 		parsed := byteframe.NewByteFrameFromBytes(bf.Data())
@@ -139,9 +139,9 @@ func TestParseCoverage_VariableLength(t *testing.T) {
 
 	t.Run("MsgMhfCreateGuild", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1)  // AckHandle
-		bf.WriteUint16(0)  // zeroed
-		bf.WriteUint16(4)  // name length
+		bf.WriteUint32(1)                 // AckHandle
+		bf.WriteUint16(0)                 // zeroed
+		bf.WriteUint16(4)                 // name length
 		bf.WriteBytes([]byte("Test\x00")) // null-terminated name
 		pkt := &MsgMhfCreateGuild{}
 		parsed := byteframe.NewByteFrameFromBytes(bf.Data())
@@ -152,15 +152,15 @@ func TestParseCoverage_VariableLength(t *testing.T) {
 
 	t.Run("MsgMhfEnumerateGuild", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1)  // AckHandle
-		bf.WriteUint8(0)   // Type
-		bf.WriteUint8(0)   // Page
-		bf.WriteBool(false) // Sorting
-		bf.WriteUint8(0)   // zero
+		bf.WriteUint32(1)              // AckHandle
+		bf.WriteUint8(0)               // Type
+		bf.WriteUint8(0)               // Page
+		bf.WriteBool(false)            // Sorting
+		bf.WriteUint8(0)               // zero
 		bf.WriteBytes(make([]byte, 4)) // Data1
-		bf.WriteUint16(0)  // zero
-		bf.WriteUint8(0)   // dataLen = 0
-		bf.WriteUint8(0)   // zero
+		bf.WriteUint16(0)              // zero
+		bf.WriteUint8(0)               // dataLen = 0
+		bf.WriteUint8(0)               // zero
 		pkt := &MsgMhfEnumerateGuild{}
 		parsed := byteframe.NewByteFrameFromBytes(bf.Data())
 		if err := pkt.Parse(parsed, ctx); err != nil {
@@ -170,9 +170,9 @@ func TestParseCoverage_VariableLength(t *testing.T) {
 
 	t.Run("MsgSysCreateSemaphore", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1)  // AckHandle
-		bf.WriteUint16(0)  // Unk0
-		bf.WriteUint8(5)   // semaphore ID length
+		bf.WriteUint32(1) // AckHandle
+		bf.WriteUint16(0) // Unk0
+		bf.WriteUint8(5)  // semaphore ID length
 		bf.WriteNullTerminatedBytes([]byte("test"))
 		pkt := &MsgSysCreateSemaphore{}
 		parsed := byteframe.NewByteFrameFromBytes(bf.Data())
@@ -198,8 +198,8 @@ func TestParseCoverage_VariableLength(t *testing.T) {
 
 	t.Run("MsgMhfUpdateGuildMessageBoard_Op1", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1) // AckHandle
-		bf.WriteUint32(1) // MessageOp = 1
+		bf.WriteUint32(1)  // AckHandle
+		bf.WriteUint32(1)  // MessageOp = 1
 		bf.WriteUint32(42) // PostID
 		pkt := &MsgMhfUpdateGuildMessageBoard{}
 		parsed := byteframe.NewByteFrameFromBytes(bf.Data())
@@ -210,11 +210,11 @@ func TestParseCoverage_VariableLength(t *testing.T) {
 
 	t.Run("MsgMhfUpdateGuildMessageBoard_Op3", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1)  // AckHandle
-		bf.WriteUint32(3)  // MessageOp = 3
-		bf.WriteUint32(42) // PostID
+		bf.WriteUint32(1)              // AckHandle
+		bf.WriteUint32(3)              // MessageOp = 3
+		bf.WriteUint32(42)             // PostID
 		bf.WriteBytes(make([]byte, 8)) // skip
-		bf.WriteUint32(0)  // StampID
+		bf.WriteUint32(0)              // StampID
 		pkt := &MsgMhfUpdateGuildMessageBoard{}
 		parsed := byteframe.NewByteFrameFromBytes(bf.Data())
 		if err := pkt.Parse(parsed, ctx); err != nil {
@@ -224,11 +224,11 @@ func TestParseCoverage_VariableLength(t *testing.T) {
 
 	t.Run("MsgMhfUpdateGuildMessageBoard_Op4", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1)  // AckHandle
-		bf.WriteUint32(4)  // MessageOp = 4
-		bf.WriteUint32(42) // PostID
+		bf.WriteUint32(1)              // AckHandle
+		bf.WriteUint32(4)              // MessageOp = 4
+		bf.WriteUint32(42)             // PostID
 		bf.WriteBytes(make([]byte, 8)) // skip
-		bf.WriteBool(true) // LikeState
+		bf.WriteBool(true)             // LikeState
 		pkt := &MsgMhfUpdateGuildMessageBoard{}
 		parsed := byteframe.NewByteFrameFromBytes(bf.Data())
 		if err := pkt.Parse(parsed, ctx); err != nil {
@@ -371,12 +371,12 @@ func TestParseCoverage_UpdateWarehouse(t *testing.T) {
 
 	t.Run("EmptyChanges", func(t *testing.T) {
 		bf := byteframe.NewByteFrame()
-		bf.WriteUint32(1)  // AckHandle
-		bf.WriteUint8(0)   // BoxType = 0 (items)
-		bf.WriteUint8(0)   // BoxIndex
-		bf.WriteUint16(0)  // changes = 0
-		bf.WriteUint8(0)   // Zeroed
-		bf.WriteUint8(0)   // Zeroed
+		bf.WriteUint32(1) // AckHandle
+		bf.WriteUint8(0)  // BoxType = 0 (items)
+		bf.WriteUint8(0)  // BoxIndex
+		bf.WriteUint16(0) // changes = 0
+		bf.WriteUint8(0)  // Zeroed
+		bf.WriteUint8(0)  // Zeroed
 		pkt := &MsgMhfUpdateWarehouse{}
 		parsed := byteframe.NewByteFrameFromBytes(bf.Data())
 		if err := pkt.Parse(parsed, ctx); err != nil {

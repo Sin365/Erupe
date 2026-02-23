@@ -11,10 +11,10 @@ import (
 
 // MsgMhfUpdateHouse represents the MSG_MHF_UPDATE_HOUSE
 type MsgMhfUpdateHouse struct {
-	AckHandle uint32
-	State     uint8
+	AckHandle   uint32
+	State       uint8
 	HasPassword uint8 // 0 = no password, 1 = has password
-	Password  string
+	Password    string
 }
 
 // Opcode returns the ID associated with this packet type.

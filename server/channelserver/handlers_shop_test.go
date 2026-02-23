@@ -223,11 +223,11 @@ func TestHandleMsgMhfAcquireExchangeShop_RecordsPurchases(t *testing.T) {
 
 	// Build payload: 2 exchanges, one with non-zero hash, one with zero hash
 	payload := byteframe.NewByteFrame()
-	payload.WriteUint16(2)       // count
-	payload.WriteUint32(12345)   // itemHash 1
-	payload.WriteUint32(3)       // buyCount 1
-	payload.WriteUint32(0)       // itemHash 2 (zero, should be skipped)
-	payload.WriteUint32(1)       // buyCount 2
+	payload.WriteUint16(2)     // count
+	payload.WriteUint32(12345) // itemHash 1
+	payload.WriteUint32(3)     // buyCount 1
+	payload.WriteUint32(0)     // itemHash 2 (zero, should be skipped)
+	payload.WriteUint32(1)     // buyCount 2
 
 	pkt := &mhfpacket.MsgMhfAcquireExchangeShop{
 		AckHandle:      100,

@@ -14,11 +14,11 @@ func TestModeStringMethod(t *testing.T) {
 		mode Mode
 		want string
 	}{
-		{S1, "S1.5"},   // versionStrings[1]
-		{S15, "S2.0"},  // versionStrings[2]
-		{G1, "G2"},     // versionStrings[21]
-		{Z1, "Z2"},     // versionStrings[39]
-		{Z2, "ZZ"},     // versionStrings[40]
+		{S1, "S1.5"},  // versionStrings[1]
+		{S15, "S2.0"}, // versionStrings[2]
+		{G1, "G2"},    // versionStrings[21]
+		{Z1, "Z2"},    // versionStrings[39]
+		{Z2, "ZZ"},    // versionStrings[40]
 	}
 
 	for _, tt := range tests {

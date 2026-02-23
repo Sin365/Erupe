@@ -229,8 +229,8 @@ func TestNormalizeDiscordMessage_Integration(t *testing.T) {
 			contains: []string{"Hello", ":smile:"},
 		},
 		{
-			name:  "mixed content",
-			input: "<@123456789012345678> sent :wave:",
+			name:     "mixed content",
+			input:    "<@123456789012345678> sent :wave:",
 			contains: []string{"sent"},
 		},
 	}

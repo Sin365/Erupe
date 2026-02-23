@@ -10,7 +10,7 @@ import (
 
 // MsgMhfGetTenrouirai represents the MSG_MHF_GET_TENROUIRAI
 type MsgMhfGetTenrouirai struct {
-	AckHandle uint32
+	AckHandle    uint32
 	Unk0         uint8
 	DataType     uint8
 	GuildID      uint32

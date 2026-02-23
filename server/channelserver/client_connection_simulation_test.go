@@ -45,7 +45,7 @@ func NewMockNetConn() *MockNetConn {
 func (m *MockNetConn) Read(b []byte) (n int, err error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if m.closed {
 		return 0, io.EOF
 	}
@@ -58,7 +58,7 @@ func (m *MockNetConn) Read(b []byte) (n int, err error) {
 func (m *MockNetConn) Write(b []byte) (n int, err error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	if m.closed {
 		return 0, io.ErrClosedPipe
 	}
@@ -130,7 +130,7 @@ func TestClientConnection_GracefulLoginLogout(t *testing.T) {
 	// Simulate client connecting
 	mockConn := NewMockNetConn()
 	session := createTestSessionForServerWithChar(server, charID, "ClientChar")
-	
+
 	// In real scenario, this would be set up by the connection handler
 	// For testing, we test handlers directly without starting packet loops
 
@@ -394,11 +394,11 @@ func TestClientConnection_SaveDuringCombat(t *testing.T) {
 	t.Log("Simulating save/logout while in quest/stage")
 
 	session := createTestSessionForServerWithChar(server, charID, "CombatChar")
-	
+
 	// Simulate being in a stage (quest)
 	// In real scenario, session.stage would be set when entering quest
 	// For now, we'll just test the basic save/logout flow
-	
+
 	// Note: Not calling Start() - testing handlers directly
 	time.Sleep(50 * time.Millisecond)
 
@@ -596,4 +596,3 @@ func TestClientConnection_PacketDuringLogout(t *testing.T) {
 		t.Log("Race outcome: logout handler wrote last - marker byte overwritten (valid)")
 	}
 }
-

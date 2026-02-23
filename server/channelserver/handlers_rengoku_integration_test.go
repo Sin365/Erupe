@@ -155,11 +155,11 @@ func TestRengokuData_SaveLoadRoundTrip(t *testing.T) {
 
 	// Build a realistic payload with non-zero skill data
 	payload := buildRengokuTestPayload(
-		15, 18519,   // MP: 15 stages, 18519 points
-		4, 381,      // SP: 4 stages, 381 points
-		[3]uint16{0x0012, 0x0034, 0x0056}, // skill slot IDs
+		15, 18519, // MP: 15 stages, 18519 points
+		4, 381, // SP: 4 stages, 381 points
+		[3]uint16{0x0012, 0x0034, 0x0056},             // skill slot IDs
 		[3]uint32{0x00110001, 0x00220002, 0x00330003}, // equipped skills
-		[3]uint32{100, 200, 300}, // skill points invested
+		[3]uint32{100, 200, 300},                      // skill points invested
 	)
 
 	// === SAVE ===
@@ -212,8 +212,8 @@ func TestRengokuData_SaveLoadRoundTrip_AcrossSessions(t *testing.T) {
 	session1 := createTestSessionForServerWithChar(server, charID, "RengokuChar2")
 
 	payload := buildRengokuTestPayload(
-		80, 342295,  // MP: deep run
-		38, 54634,   // SP: deep run
+		80, 342295, // MP: deep run
+		38, 54634, // SP: deep run
 		[3]uint16{0x00AA, 0x00BB, 0x00CC},
 		[3]uint32{0xDEAD0001, 0xBEEF0002, 0xCAFE0003},
 		[3]uint32{500, 750, 1000},
@@ -1052,9 +1052,9 @@ func TestRengokuData_LargePayload(t *testing.T) {
 	}
 	// Ensure valid score region at offsets 71-90
 	binary.BigEndian.PutUint32(payload[71:75], 20)    // maxStageMp
-	binary.BigEndian.PutUint32(payload[75:79], 30000)  // maxScoreMp
-	binary.BigEndian.PutUint32(payload[83:87], 10)     // maxStageSp
-	binary.BigEndian.PutUint32(payload[87:91], 15000)  // maxScoreSp
+	binary.BigEndian.PutUint32(payload[75:79], 30000) // maxScoreMp
+	binary.BigEndian.PutUint32(payload[83:87], 10)    // maxStageSp
+	binary.BigEndian.PutUint32(payload[87:91], 15000) // maxScoreSp
 
 	savePkt := &mhfpacket.MsgMhfSaveRengokuData{
 		AckHandle:      10001,

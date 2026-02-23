@@ -326,8 +326,8 @@ func TestHandleMsgMhfPlayStepupGacha_Success(t *testing.T) {
 func TestHandleMsgMhfGetStepupStatus_FreshStep(t *testing.T) {
 	server := createMockServer()
 	gachaRepo := &mockGachaRepo{
-		stepupStep: 2,
-		stepupTime: time.Now(), // recent, not stale
+		stepupStep:   2,
+		stepupTime:   time.Now(), // recent, not stale
 		hasEntryType: true,
 	}
 	server.gachaRepo = gachaRepo

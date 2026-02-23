@@ -23,11 +23,11 @@ func TestEncodeServerInfo_EmptyClanMemberLimits(t *testing.T) {
 			Port:    53310,
 			Entries: []cfg.EntranceServerInfo{
 				{
-					Name:        "TestServer",
-					Description: "Test",
-					IP:          "127.0.0.1",
-					Type:        0,
-					Recommended: 0,
+					Name:               "TestServer",
+					Description:        "Test",
+					IP:                 "127.0.0.1",
+					Type:               0,
+					Recommended:        0,
 					AllowedClientFlags: 0xFFFFFFFF,
 					Channels: []cfg.EntranceChannelInfo{
 						{
@@ -74,10 +74,10 @@ func TestEncodeServerInfo_EmptyClanMemberLimits(t *testing.T) {
 func TestClanMemberLimitsBoundsChecking(t *testing.T) {
 	// Test the bounds checking logic directly
 	testCases := []struct {
-		name              string
-		clanMemberLimits  [][]uint8
-		expectedValue     uint8
-		expectDefault     bool
+		name             string
+		clanMemberLimits [][]uint8
+		expectedValue    uint8
+		expectDefault    bool
 	}{
 		{"empty array", [][]uint8{}, 60, true},
 		{"single row with 2 columns", [][]uint8{{1, 50}}, 50, false},
@@ -112,7 +112,6 @@ func TestClanMemberLimitsBoundsChecking(t *testing.T) {
 	}
 }
 
-
 // TestEncodeServerInfo_WithMockRepo tests encodeServerInfo with a mock server repo
 func TestEncodeServerInfo_WithMockRepo(t *testing.T) {
 	config := &cfg.Config{
@@ -123,11 +122,11 @@ func TestEncodeServerInfo_WithMockRepo(t *testing.T) {
 			Port:    53310,
 			Entries: []cfg.EntranceServerInfo{
 				{
-					Name:        "TestServer",
-					Description: "Test",
-					IP:          "127.0.0.1",
-					Type:        0,
-					Recommended: 0,
+					Name:               "TestServer",
+					Description:        "Test",
+					IP:                 "127.0.0.1",
+					Type:               0,
+					Recommended:        0,
 					AllowedClientFlags: 0xFFFFFFFF,
 					Channels: []cfg.EntranceChannelInfo{
 						{
@@ -218,11 +217,11 @@ func TestEncodeServerInfo_MissingSecondColumnClanMemberLimits(t *testing.T) {
 			Port:    53310,
 			Entries: []cfg.EntranceServerInfo{
 				{
-					Name:        "TestServer",
-					Description: "Test",
-					IP:          "127.0.0.1",
-					Type:        0,
-					Recommended: 0,
+					Name:               "TestServer",
+					Description:        "Test",
+					IP:                 "127.0.0.1",
+					Type:               0,
+					Recommended:        0,
 					AllowedClientFlags: 0xFFFFFFFF,
 					Channels: []cfg.EntranceChannelInfo{
 						{

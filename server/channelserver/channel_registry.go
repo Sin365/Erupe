@@ -36,23 +36,23 @@ type ChannelRegistry interface {
 
 // SessionSnapshot is an immutable copy of session data taken under lock.
 type SessionSnapshot struct {
-	CharID       uint32
-	Name         string
-	StageID      string
-	ServerIP     net.IP
-	ServerPort   uint16
-	UserBinary3  []byte // Copy of userBinaryParts index 3
+	CharID      uint32
+	Name        string
+	StageID     string
+	ServerIP    net.IP
+	ServerPort  uint16
+	UserBinary3 []byte // Copy of userBinaryParts index 3
 }
 
 // StageSnapshot is an immutable copy of stage data taken under lock.
 type StageSnapshot struct {
-	ServerIP     net.IP
-	ServerPort   uint16
-	StageID      string
-	ClientCount  int
-	Reserved     int
-	MaxPlayers   uint16
-	RawBinData0  []byte
-	RawBinData1  []byte
-	RawBinData3  []byte
+	ServerIP    net.IP
+	ServerPort  uint16
+	StageID     string
+	ClientCount int
+	Reserved    int
+	MaxPlayers  uint16
+	RawBinData0 []byte
+	RawBinData1 []byte
+	RawBinData3 []byte
 }

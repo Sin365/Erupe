@@ -33,8 +33,8 @@ func TestLoadGuildCooking_WithActiveMeals(t *testing.T) {
 	server := createMockServer()
 	guildMock := &mockGuildRepoOps{
 		meals: []*GuildMeal{
-			{ID: 1, MealID: 100, Level: 3, CreatedAt: TimeAdjusted()},                        // active (within 60 min)
-			{ID: 2, MealID: 200, Level: 1, CreatedAt: TimeAdjusted().Add(-2 * time.Hour)},     // expired
+			{ID: 1, MealID: 100, Level: 3, CreatedAt: TimeAdjusted()},                     // active (within 60 min)
+			{ID: 2, MealID: 200, Level: 1, CreatedAt: TimeAdjusted().Add(-2 * time.Hour)}, // expired
 		},
 	}
 	guildMock.guild = &Guild{ID: 10}

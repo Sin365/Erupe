@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"io"
-	
+
 	cfg "erupe-ce/config"
 	"erupe-ce/network"
 	"sync"
@@ -76,27 +76,27 @@ func createTestSession(mock network.Conn) *Session {
 // with their own terminators instead of being concatenated
 func TestPacketQueueIndividualSending(t *testing.T) {
 	tests := []struct {
-		name           string
-		packetCount    int
-		wantPackets    int
+		name            string
+		packetCount     int
+		wantPackets     int
 		wantTerminators int
 	}{
 		{
-			name:           "single_packet",
-			packetCount:    1,
-			wantPackets:    1,
+			name:            "single_packet",
+			packetCount:     1,
+			wantPackets:     1,
 			wantTerminators: 1,
 		},
 		{
-			name:           "multiple_packets",
-			packetCount:    5,
-			wantPackets:    5,
+			name:            "multiple_packets",
+			packetCount:     5,
+			wantPackets:     5,
 			wantTerminators: 5,
 		},
 		{
-			name:           "many_packets",
-			packetCount:    20,
-			wantPackets:    20,
+			name:            "many_packets",
+			packetCount:     20,
+			wantPackets:     20,
 			wantTerminators: 20,
 		},
 	}
