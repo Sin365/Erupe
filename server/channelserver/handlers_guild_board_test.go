@@ -12,7 +12,7 @@ import (
 func TestUpdateGuildMessageBoard_CreatePost(t *testing.T) {
 	server := createMockServer()
 	charMock := newMockCharacterRepo()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -49,7 +49,7 @@ func TestUpdateGuildMessageBoard_CreatePost(t *testing.T) {
 func TestUpdateGuildMessageBoard_DeletePost(t *testing.T) {
 	server := createMockServer()
 	charMock := newMockCharacterRepo()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -74,7 +74,7 @@ func TestUpdateGuildMessageBoard_DeletePost(t *testing.T) {
 func TestUpdateGuildMessageBoard_NoGuild(t *testing.T) {
 	server := createMockServer()
 	charMock := newMockCharacterRepo()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.getErr = errNotFound
 	server.guildRepo = guildMock
 	server.charRepo = charMock
@@ -98,7 +98,7 @@ func TestUpdateGuildMessageBoard_NoGuild(t *testing.T) {
 func TestUpdateGuildMessageBoard_Applicant(t *testing.T) {
 	server := createMockServer()
 	charMock := newMockCharacterRepo()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		hasAppResult: true, // is an applicant
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -128,7 +128,7 @@ func TestUpdateGuildMessageBoard_Applicant(t *testing.T) {
 func TestUpdateGuildMessageBoard_HasAppError(t *testing.T) {
 	server := createMockServer()
 	charMock := newMockCharacterRepo()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		hasAppErr: errNotFound, // error checking app status
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -159,7 +159,7 @@ func TestUpdateGuildMessageBoard_HasAppError(t *testing.T) {
 func TestEnumerateGuildMessageBoard_NoPosts(t *testing.T) {
 	server := createMockServer()
 	charMock := newMockCharacterRepo()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		posts: []*MessageBoardPost{},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -185,7 +185,7 @@ func TestEnumerateGuildMessageBoard_NoPosts(t *testing.T) {
 func TestEnumerateGuildMessageBoard_WithPosts(t *testing.T) {
 	server := createMockServer()
 	charMock := newMockCharacterRepo()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		posts: []*MessageBoardPost{
 			{ID: 1, AuthorID: 100, StampID: 5, Title: "Hello", Body: "World", Timestamp: time.Now()},
 			{ID: 2, AuthorID: 200, StampID: 0, Title: "Test", Body: "Post", Timestamp: time.Now()},
@@ -217,7 +217,7 @@ func TestEnumerateGuildMessageBoard_WithPosts(t *testing.T) {
 func TestEnumerateGuildMessageBoard_DBError(t *testing.T) {
 	server := createMockServer()
 	charMock := newMockCharacterRepo()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		listPostsErr: errNotFound,
 	}
 	guildMock.guild = &Guild{ID: 10}

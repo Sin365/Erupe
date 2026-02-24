@@ -11,7 +11,7 @@ import (
 
 func TestEnumerateGuildTresure_NoGuild(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.getErr = errNotFound
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
@@ -29,7 +29,7 @@ func TestEnumerateGuildTresure_NoGuild(t *testing.T) {
 
 func TestEnumerateGuildTresure_PendingHunt(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		pendingHunt: &TreasureHunt{
 			HuntID:      1,
 			Destination: 5,
@@ -60,7 +60,7 @@ func TestEnumerateGuildTresure_GuildHunts(t *testing.T) {
 	server := createMockServer()
 	// Set a large expiry so hunts are considered active
 	server.erupeConfig.GameplayOptions.TreasureHuntExpiry = 86400
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		guildHunts: []*TreasureHunt{
 			{HuntID: 1, Destination: 5, Level: 2, Start: TimeAdjusted(), HuntData: make([]byte, 10)},
 			{HuntID: 2, Destination: 8, Level: 3, Start: TimeAdjusted(), HuntData: make([]byte, 10)},
@@ -86,7 +86,7 @@ func TestEnumerateGuildTresure_GuildHunts(t *testing.T) {
 
 func TestEnumerateGuildTresure_ListError(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		listHuntsErr: errNotFound,
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -108,7 +108,7 @@ func TestEnumerateGuildTresure_ListError(t *testing.T) {
 
 func TestAcquireGuildTresure_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
 
@@ -131,7 +131,7 @@ func TestAcquireGuildTresure_Success(t *testing.T) {
 
 func TestOperateGuildTresureReport_Register(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
 
@@ -150,7 +150,7 @@ func TestOperateGuildTresureReport_Register(t *testing.T) {
 
 func TestOperateGuildTresureReport_Collect(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
 
@@ -169,7 +169,7 @@ func TestOperateGuildTresureReport_Collect(t *testing.T) {
 
 func TestOperateGuildTresureReport_Claim(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
 

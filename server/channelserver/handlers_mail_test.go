@@ -427,7 +427,7 @@ func TestHandleMsgMhfSendMail_Direct(t *testing.T) {
 func TestHandleMsgMhfSendMail_Guild(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoForMail{
+	guildMock := &mockGuildRepo{
 		guild: &Guild{ID: 10},
 		members: []*GuildMember{
 			{CharID: 100},
@@ -469,7 +469,7 @@ func TestHandleMsgMhfSendMail_Guild(t *testing.T) {
 func TestHandleMsgMhfSendMail_GuildNotFound(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoForMail{getErr: errNotFound}
+	guildMock := &mockGuildRepo{getErr: errNotFound}
 	server.mailRepo = mailMock
 	server.guildRepo = guildMock
 	ensureMailService(server)

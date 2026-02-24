@@ -10,7 +10,7 @@ import (
 
 func TestLoadGuildAdventure_NoAdventures(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		adventures: []*GuildAdventure{},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -30,7 +30,7 @@ func TestLoadGuildAdventure_NoAdventures(t *testing.T) {
 
 func TestLoadGuildAdventure_WithAdventures(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		adventures: []*GuildAdventure{
 			{ID: 1, Destination: 5, Charge: 0, Depart: 1000, Return: 2000, CollectedBy: ""},
 			{ID: 2, Destination: 8, Charge: 100, Depart: 1000, Return: 2000, CollectedBy: "1"},
@@ -56,7 +56,7 @@ func TestLoadGuildAdventure_WithAdventures(t *testing.T) {
 
 func TestLoadGuildAdventure_DBError(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		listAdvErr: errNotFound,
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -78,7 +78,7 @@ func TestLoadGuildAdventure_DBError(t *testing.T) {
 
 func TestRegistGuildAdventure_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.guild = &Guild{ID: 10}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
@@ -99,7 +99,7 @@ func TestRegistGuildAdventure_Success(t *testing.T) {
 
 func TestRegistGuildAdventure_Error(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{createAdvErr: errNotFound}
+	guildMock := &mockGuildRepo{createAdvErr: errNotFound}
 	guildMock.guild = &Guild{ID: 10}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
@@ -123,7 +123,7 @@ func TestRegistGuildAdventure_Error(t *testing.T) {
 
 func TestAcquireGuildAdventure_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
 
@@ -149,7 +149,7 @@ func TestAcquireGuildAdventure_Success(t *testing.T) {
 
 func TestChargeGuildAdventure_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
 
@@ -179,7 +179,7 @@ func TestChargeGuildAdventure_Success(t *testing.T) {
 
 func TestRegistGuildAdventureDiva_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.guild = &Guild{ID: 10}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)

@@ -12,7 +12,7 @@ import (
 
 func TestCreateJoint_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
 
@@ -33,7 +33,7 @@ func TestCreateJoint_Success(t *testing.T) {
 
 func TestCreateJoint_Error(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{createAllianceErr: errNotFound}
+	guildMock := &mockGuildRepo{createAllianceErr: errNotFound}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
 
@@ -57,7 +57,7 @@ func TestCreateJoint_Error(t *testing.T) {
 
 func TestOperateJoint_Disband_AsOwner(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		alliance: &GuildAlliance{
 			ID:            5,
 			ParentGuildID: 10,
@@ -90,7 +90,7 @@ func TestOperateJoint_Disband_AsOwner(t *testing.T) {
 
 func TestOperateJoint_Disband_NotOwner(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		alliance: &GuildAlliance{
 			ID:            5,
 			ParentGuildID: 99, // different guild
@@ -117,7 +117,7 @@ func TestOperateJoint_Disband_NotOwner(t *testing.T) {
 
 func TestOperateJoint_Leave_AsLeader(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		alliance: &GuildAlliance{
 			ID:            5,
 			ParentGuildID: 99,
@@ -148,7 +148,7 @@ func TestOperateJoint_Leave_AsLeader(t *testing.T) {
 
 func TestOperateJoint_Leave_NotLeader(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		alliance: &GuildAlliance{ID: 5, ParentGuildID: 99},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -172,7 +172,7 @@ func TestOperateJoint_Leave_NotLeader(t *testing.T) {
 
 func TestOperateJoint_Kick_AsAllianceOwner(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		alliance: &GuildAlliance{
 			ID:            5,
 			ParentGuildID: 10,
@@ -211,7 +211,7 @@ func TestOperateJoint_Kick_AsAllianceOwner(t *testing.T) {
 
 func TestOperateJoint_Kick_NotOwner(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		alliance: &GuildAlliance{
 			ID:            5,
 			ParentGuildID: 99,
@@ -242,7 +242,7 @@ func TestOperateJoint_Kick_NotOwner(t *testing.T) {
 
 func TestInfoJoint_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		alliance: &GuildAlliance{
 			ID:            5,
 			Name:          "TestAlliance",
@@ -271,7 +271,7 @@ func TestInfoJoint_Success(t *testing.T) {
 
 func TestInfoJoint_WithSubGuilds(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		alliance: &GuildAlliance{
 			ID:            5,
 			Name:          "BigAlliance",
@@ -304,7 +304,7 @@ func TestInfoJoint_WithSubGuilds(t *testing.T) {
 
 func TestInfoJoint_NotFound(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{getAllianceErr: errNotFound}
+	guildMock := &mockGuildRepo{getAllianceErr: errNotFound}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
 

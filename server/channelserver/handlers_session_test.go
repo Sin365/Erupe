@@ -210,7 +210,7 @@ func TestHandleMsgSysRecordLog_ZZMode(t *testing.T) {
 	server.erupeConfig.RealClientMode = cfg.ZZ
 	server.userBinary = NewUserBinaryStore()
 
-	guildRepo := &mockGuildRepoForMail{}
+	guildRepo := &mockGuildRepo{}
 	server.guildRepo = guildRepo
 
 	session := createMockSession(1, server)

@@ -262,122 +262,19 @@ func (m *mockGoocooRepo) SaveSlot(_ uint32, slot uint32, data []byte) error {
 	return nil
 }
 
-// --- mockGuildRepo (minimal, for SendMail guild path) ---
+// --- mockGuildRepo ---
 
-type mockGuildRepoForMail struct {
-	guild         *Guild
-	members       []*GuildMember
-	getErr        error
-	getMembersErr error
-}
-
-func (m *mockGuildRepoForMail) GetByCharID(_ uint32) (*Guild, error) {
-	if m.getErr != nil {
-		return nil, m.getErr
-	}
-	return m.guild, nil
-}
-
-func (m *mockGuildRepoForMail) GetMembers(_ uint32, _ bool) ([]*GuildMember, error) {
-	if m.getMembersErr != nil {
-		return nil, m.getMembersErr
-	}
-	return m.members, nil
-}
-
-// Stub out all other GuildRepo methods.
-func (m *mockGuildRepoForMail) GetByID(_ uint32) (*Guild, error)         { return nil, errNotFound }
-func (m *mockGuildRepoForMail) ListAll() ([]*Guild, error)               { return nil, nil }
-func (m *mockGuildRepoForMail) Create(_ uint32, _ string) (int32, error) { return 0, nil }
-func (m *mockGuildRepoForMail) Save(_ *Guild) error                      { return nil }
-func (m *mockGuildRepoForMail) Disband(_ uint32) error                   { return nil }
-func (m *mockGuildRepoForMail) RemoveCharacter(_ uint32) error           { return nil }
-func (m *mockGuildRepoForMail) AcceptApplication(_, _ uint32) error      { return nil }
-func (m *mockGuildRepoForMail) CreateApplication(_, _, _ uint32, _ GuildApplicationType) error {
-	return nil
-}
-func (m *mockGuildRepoForMail) CreateApplicationWithMail(_, _, _ uint32, _ GuildApplicationType, _, _ uint32, _, _ string) error {
-	return nil
-}
-func (m *mockGuildRepoForMail) CancelInvitation(_, _ uint32) error  { return nil }
-func (m *mockGuildRepoForMail) RejectApplication(_, _ uint32) error { return nil }
-func (m *mockGuildRepoForMail) ArrangeCharacters(_ []uint32) error  { return nil }
-func (m *mockGuildRepoForMail) GetApplication(_, _ uint32, _ GuildApplicationType) (*GuildApplication, error) {
-	return nil, nil
-}
-func (m *mockGuildRepoForMail) HasApplication(_, _ uint32) (bool, error) { return false, nil }
-func (m *mockGuildRepoForMail) GetItemBox(_ uint32) ([]byte, error)      { return nil, nil }
-func (m *mockGuildRepoForMail) SaveItemBox(_ uint32, _ []byte) error     { return nil }
-func (m *mockGuildRepoForMail) GetCharacterMembership(_ uint32) (*GuildMember, error) {
-	return nil, nil
-}
-func (m *mockGuildRepoForMail) SaveMember(_ *GuildMember) error                    { return nil }
-func (m *mockGuildRepoForMail) SetRecruiting(_ uint32, _ bool) error               { return nil }
-func (m *mockGuildRepoForMail) SetPugiOutfits(_ uint32, _ uint32) error            { return nil }
-func (m *mockGuildRepoForMail) SetRecruiter(_ uint32, _ bool) error                { return nil }
-func (m *mockGuildRepoForMail) AddMemberDailyRP(_ uint32, _ uint16) error          { return nil }
-func (m *mockGuildRepoForMail) ExchangeEventRP(_ uint32, _ uint16) (uint32, error) { return 0, nil }
-func (m *mockGuildRepoForMail) AddRankRP(_ uint32, _ uint16) error                 { return nil }
-func (m *mockGuildRepoForMail) AddEventRP(_ uint32, _ uint16) error                { return nil }
-func (m *mockGuildRepoForMail) GetRoomRP(_ uint32) (uint16, error)                 { return 0, nil }
-func (m *mockGuildRepoForMail) SetRoomRP(_ uint32, _ uint16) error                 { return nil }
-func (m *mockGuildRepoForMail) AddRoomRP(_ uint32, _ uint16) error                 { return nil }
-func (m *mockGuildRepoForMail) SetRoomExpiry(_ uint32, _ time.Time) error          { return nil }
-func (m *mockGuildRepoForMail) ListPosts(_ uint32, _ int) ([]*MessageBoardPost, error) {
-	return nil, nil
-}
-func (m *mockGuildRepoForMail) CreatePost(_, _, _ uint32, _ int, _, _ string, _ int) error {
-	return nil
-}
-func (m *mockGuildRepoForMail) DeletePost(_ uint32) error                          { return nil }
-func (m *mockGuildRepoForMail) UpdatePost(_ uint32, _, _ string) error             { return nil }
-func (m *mockGuildRepoForMail) UpdatePostStamp(_, _ uint32) error                  { return nil }
-func (m *mockGuildRepoForMail) GetPostLikedBy(_ uint32) (string, error)            { return "", nil }
-func (m *mockGuildRepoForMail) SetPostLikedBy(_ uint32, _ string) error            { return nil }
-func (m *mockGuildRepoForMail) CountNewPosts(_ uint32, _ time.Time) (int, error)   { return 0, nil }
-func (m *mockGuildRepoForMail) GetAllianceByID(_ uint32) (*GuildAlliance, error)   { return nil, nil }
-func (m *mockGuildRepoForMail) ListAlliances() ([]*GuildAlliance, error)           { return nil, nil }
-func (m *mockGuildRepoForMail) CreateAlliance(_ string, _ uint32) error            { return nil }
-func (m *mockGuildRepoForMail) DeleteAlliance(_ uint32) error                      { return nil }
-func (m *mockGuildRepoForMail) RemoveGuildFromAlliance(_, _, _, _ uint32) error    { return nil }
-func (m *mockGuildRepoForMail) ListAdventures(_ uint32) ([]*GuildAdventure, error) { return nil, nil }
-func (m *mockGuildRepoForMail) CreateAdventure(_, _ uint32, _, _ int64) error      { return nil }
-func (m *mockGuildRepoForMail) CreateAdventureWithCharge(_, _, _ uint32, _, _ int64) error {
-	return nil
-}
-func (m *mockGuildRepoForMail) CollectAdventure(_ uint32, _ uint32) error                 { return nil }
-func (m *mockGuildRepoForMail) ChargeAdventure(_ uint32, _ uint32) error                  { return nil }
-func (m *mockGuildRepoForMail) GetPendingHunt(_ uint32) (*TreasureHunt, error)            { return nil, nil }
-func (m *mockGuildRepoForMail) ListGuildHunts(_, _ uint32) ([]*TreasureHunt, error)       { return nil, nil }
-func (m *mockGuildRepoForMail) CreateHunt(_, _, _, _ uint32, _ []byte, _ string) error    { return nil }
-func (m *mockGuildRepoForMail) AcquireHunt(_ uint32) error                                { return nil }
-func (m *mockGuildRepoForMail) RegisterHuntReport(_, _ uint32) error                      { return nil }
-func (m *mockGuildRepoForMail) CollectHunt(_ uint32) error                                { return nil }
-func (m *mockGuildRepoForMail) ClaimHuntReward(_, _ uint32) error                         { return nil }
-func (m *mockGuildRepoForMail) ListMeals(_ uint32) ([]*GuildMeal, error)                  { return nil, nil }
-func (m *mockGuildRepoForMail) CreateMeal(_, _, _ uint32, _ time.Time) (uint32, error)    { return 0, nil }
-func (m *mockGuildRepoForMail) UpdateMeal(_, _, _ uint32, _ time.Time) error              { return nil }
-func (m *mockGuildRepoForMail) ClaimHuntBox(_ uint32, _ time.Time) error                  { return nil }
-func (m *mockGuildRepoForMail) ListGuildKills(_, _ uint32) ([]*GuildKill, error)          { return nil, nil }
-func (m *mockGuildRepoForMail) CountGuildKills(_, _ uint32) (int, error)                  { return 0, nil }
-func (m *mockGuildRepoForMail) ClearTreasureHunt(_ uint32) error                          { return nil }
-func (m *mockGuildRepoForMail) InsertKillLog(_ uint32, _ int, _ uint8, _ time.Time) error { return nil }
-func (m *mockGuildRepoForMail) ListInvitedCharacters(_ uint32) ([]*ScoutedCharacter, error) {
-	return nil, nil
-}
-func (m *mockGuildRepoForMail) RolloverDailyRP(_ uint32, _ time.Time) error { return nil }
-func (m *mockGuildRepoForMail) AddWeeklyBonusUsers(_ uint32, _ uint8) error { return nil }
-
-// --- mockGuildRepoOps (enhanced guild repo for ops/scout/board tests) ---
-
-type mockGuildRepoOps struct {
-	mockGuildRepoForMail
+type mockGuildRepo struct {
+	// Core data
+	guild   *Guild
+	members []*GuildMember
 
 	// Configurable errors
+	getErr        error
+	getMembersErr error
 	saveErr       error
 	saveMemberErr error
 	disbandErr    error
-	getMembersErr error
 	acceptErr     error
 	rejectErr     error
 	removeErr     error
@@ -402,12 +299,12 @@ type mockGuildRepoOps struct {
 
 	// Alliance
 	alliance          *GuildAlliance
-	getAllianceErr    error
-	createAllianceErr error
-	deleteAllianceErr error
-	removeAllyErr     error
-	deletedAllianceID uint32
-	removedAllyArgs   []uint32
+	getAllianceErr     error
+	createAllianceErr  error
+	deleteAllianceErr  error
+	removeAllyErr      error
+	deletedAllianceID  uint32
+	removedAllyArgs    []uint32
 
 	// Cooking
 	meals         []*GuildMeal
@@ -447,7 +344,7 @@ type mockGuildRepoOps struct {
 	posts       []*MessageBoardPost
 }
 
-func (m *mockGuildRepoOps) GetByID(guildID uint32) (*Guild, error) {
+func (m *mockGuildRepo) GetByID(guildID uint32) (*Guild, error) {
 	if m.getErr != nil {
 		return nil, m.getErr
 	}
@@ -457,184 +354,219 @@ func (m *mockGuildRepoOps) GetByID(guildID uint32) (*Guild, error) {
 	return nil, errNotFound
 }
 
-func (m *mockGuildRepoOps) GetByCharID(charID uint32) (*Guild, error) {
+func (m *mockGuildRepo) GetByCharID(_ uint32) (*Guild, error) {
 	if m.getErr != nil {
 		return nil, m.getErr
 	}
 	return m.guild, nil
 }
 
-func (m *mockGuildRepoOps) GetMembers(guildID uint32, applicants bool) ([]*GuildMember, error) {
+func (m *mockGuildRepo) GetMembers(_ uint32, _ bool) ([]*GuildMember, error) {
 	if m.getMembersErr != nil {
 		return nil, m.getMembersErr
 	}
 	return m.members, nil
 }
 
-func (m *mockGuildRepoOps) GetCharacterMembership(_ uint32) (*GuildMember, error) {
+func (m *mockGuildRepo) GetCharacterMembership(_ uint32) (*GuildMember, error) {
 	if m.getMemberErr != nil {
 		return nil, m.getMemberErr
 	}
 	return m.membership, nil
 }
 
-func (m *mockGuildRepoOps) Save(guild *Guild) error {
+func (m *mockGuildRepo) Save(guild *Guild) error {
 	m.savedGuild = guild
 	return m.saveErr
 }
 
-func (m *mockGuildRepoOps) SaveMember(member *GuildMember) error {
+func (m *mockGuildRepo) SaveMember(member *GuildMember) error {
 	m.savedMembers = append(m.savedMembers, member)
 	return m.saveMemberErr
 }
 
-func (m *mockGuildRepoOps) Disband(guildID uint32) error {
+func (m *mockGuildRepo) Disband(guildID uint32) error {
 	m.disbandedID = guildID
 	return m.disbandErr
 }
 
-func (m *mockGuildRepoOps) RemoveCharacter(charID uint32) error {
+func (m *mockGuildRepo) RemoveCharacter(charID uint32) error {
 	m.removedCharID = charID
 	return m.removeErr
 }
 
-func (m *mockGuildRepoOps) AcceptApplication(guildID, charID uint32) error {
+func (m *mockGuildRepo) AcceptApplication(_, charID uint32) error {
 	m.acceptedCharID = charID
 	return m.acceptErr
 }
 
-func (m *mockGuildRepoOps) RejectApplication(guildID, charID uint32) error {
+func (m *mockGuildRepo) RejectApplication(_, charID uint32) error {
 	m.rejectedCharID = charID
 	return m.rejectErr
 }
 
-func (m *mockGuildRepoOps) CreateApplication(guildID, charID, actorID uint32, appType GuildApplicationType) error {
+func (m *mockGuildRepo) CreateApplication(guildID, charID, actorID uint32, appType GuildApplicationType) error {
 	m.createdAppArgs = []interface{}{guildID, charID, actorID, appType}
 	return m.createAppErr
 }
 
-func (m *mockGuildRepoOps) HasApplication(guildID, charID uint32) (bool, error) {
+func (m *mockGuildRepo) HasApplication(_, _ uint32) (bool, error) {
 	return m.hasAppResult, m.hasAppErr
 }
 
-func (m *mockGuildRepoOps) GetApplication(guildID, charID uint32, appType GuildApplicationType) (*GuildApplication, error) {
+func (m *mockGuildRepo) GetApplication(_, _ uint32, _ GuildApplicationType) (*GuildApplication, error) {
 	return m.application, nil
 }
 
-func (m *mockGuildRepoOps) ListPosts(guildID uint32, postType int) ([]*MessageBoardPost, error) {
+func (m *mockGuildRepo) ListPosts(_ uint32, _ int) ([]*MessageBoardPost, error) {
 	if m.listPostsErr != nil {
 		return nil, m.listPostsErr
 	}
 	return m.posts, nil
 }
 
-func (m *mockGuildRepoOps) CreatePost(guildID, authorID, stampID uint32, postType int, title, body string, maxPosts int) error {
+func (m *mockGuildRepo) CreatePost(guildID, authorID, stampID uint32, postType int, title, body string, maxPosts int) error {
 	m.createdPost = []interface{}{guildID, authorID, stampID, postType, title, body, maxPosts}
 	return m.createPostErr
 }
 
-func (m *mockGuildRepoOps) DeletePost(postID uint32) error {
+func (m *mockGuildRepo) DeletePost(postID uint32) error {
 	m.deletedPostID = postID
 	return m.deletePostErr
 }
 
-func (m *mockGuildRepoOps) GetAllianceByID(_ uint32) (*GuildAlliance, error) {
+func (m *mockGuildRepo) GetAllianceByID(_ uint32) (*GuildAlliance, error) {
 	return m.alliance, m.getAllianceErr
 }
 
-func (m *mockGuildRepoOps) CreateAlliance(_ string, _ uint32) error {
+func (m *mockGuildRepo) CreateAlliance(_ string, _ uint32) error {
 	return m.createAllianceErr
 }
 
-func (m *mockGuildRepoOps) DeleteAlliance(id uint32) error {
+func (m *mockGuildRepo) DeleteAlliance(id uint32) error {
 	m.deletedAllianceID = id
 	return m.deleteAllianceErr
 }
 
-func (m *mockGuildRepoOps) RemoveGuildFromAlliance(allyID, guildID, sub1, sub2 uint32) error {
+func (m *mockGuildRepo) RemoveGuildFromAlliance(allyID, guildID, sub1, sub2 uint32) error {
 	m.removedAllyArgs = []uint32{allyID, guildID, sub1, sub2}
 	return m.removeAllyErr
 }
 
-func (m *mockGuildRepoOps) ListMeals(_ uint32) ([]*GuildMeal, error) {
+func (m *mockGuildRepo) ListMeals(_ uint32) ([]*GuildMeal, error) {
 	return m.meals, m.listMealsErr
 }
 
-func (m *mockGuildRepoOps) CreateMeal(_, _, _ uint32, _ time.Time) (uint32, error) {
+func (m *mockGuildRepo) CreateMeal(_, _, _ uint32, _ time.Time) (uint32, error) {
 	return m.createdMealID, m.createMealErr
 }
 
-func (m *mockGuildRepoOps) UpdateMeal(_, _, _ uint32, _ time.Time) error {
+func (m *mockGuildRepo) UpdateMeal(_, _, _ uint32, _ time.Time) error {
 	return m.updateMealErr
 }
 
-func (m *mockGuildRepoOps) ListAdventures(_ uint32) ([]*GuildAdventure, error) {
+func (m *mockGuildRepo) ListAdventures(_ uint32) ([]*GuildAdventure, error) {
 	return m.adventures, m.listAdvErr
 }
 
-func (m *mockGuildRepoOps) CreateAdventure(_, _ uint32, _, _ int64) error {
+func (m *mockGuildRepo) CreateAdventure(_, _ uint32, _, _ int64) error {
 	return m.createAdvErr
 }
 
-func (m *mockGuildRepoOps) CreateAdventureWithCharge(_, _, _ uint32, _, _ int64) error {
+func (m *mockGuildRepo) CreateAdventureWithCharge(_, _, _ uint32, _, _ int64) error {
 	return m.createAdvErr
 }
 
-func (m *mockGuildRepoOps) CollectAdventure(id uint32, _ uint32) error {
+func (m *mockGuildRepo) CollectAdventure(id uint32, _ uint32) error {
 	m.collectAdvID = id
 	return nil
 }
 
-func (m *mockGuildRepoOps) ChargeAdventure(id uint32, amount uint32) error {
+func (m *mockGuildRepo) ChargeAdventure(id uint32, amount uint32) error {
 	m.chargeAdvID = id
 	m.chargeAdvAmount = amount
 	return nil
 }
 
-func (m *mockGuildRepoOps) GetPendingHunt(_ uint32) (*TreasureHunt, error) {
+func (m *mockGuildRepo) GetPendingHunt(_ uint32) (*TreasureHunt, error) {
 	return m.pendingHunt, nil
 }
 
-func (m *mockGuildRepoOps) ListGuildHunts(_, _ uint32) ([]*TreasureHunt, error) {
+func (m *mockGuildRepo) ListGuildHunts(_, _ uint32) ([]*TreasureHunt, error) {
 	return m.guildHunts, m.listHuntsErr
 }
 
-func (m *mockGuildRepoOps) CreateHunt(_, _, _, _ uint32, _ []byte, _ string) error {
+func (m *mockGuildRepo) CreateHunt(_, _, _, _ uint32, _ []byte, _ string) error {
 	return m.createHuntErr
 }
 
-func (m *mockGuildRepoOps) AcquireHunt(id uint32) error {
+func (m *mockGuildRepo) AcquireHunt(id uint32) error {
 	m.acquireHuntID = id
 	return nil
 }
 
-func (m *mockGuildRepoOps) RegisterHuntReport(id, _ uint32) error {
+func (m *mockGuildRepo) RegisterHuntReport(id, _ uint32) error {
 	m.reportHuntID = id
 	return nil
 }
 
-func (m *mockGuildRepoOps) CollectHunt(id uint32) error {
+func (m *mockGuildRepo) CollectHunt(id uint32) error {
 	m.collectHuntID = id
 	return nil
 }
 
-func (m *mockGuildRepoOps) ClaimHuntReward(id, _ uint32) error {
+func (m *mockGuildRepo) ClaimHuntReward(id, _ uint32) error {
 	m.claimHuntID = id
 	return nil
 }
 
-func (m *mockGuildRepoOps) ClaimHuntBox(_ uint32, _ time.Time) error {
+func (m *mockGuildRepo) ClaimHuntBox(_ uint32, _ time.Time) error {
 	m.claimBoxCalled = true
 	return nil
 }
 
-func (m *mockGuildRepoOps) ListGuildKills(_, _ uint32) ([]*GuildKill, error) {
+func (m *mockGuildRepo) ListGuildKills(_, _ uint32) ([]*GuildKill, error) {
 	return m.guildKills, m.listKillsErr
 }
 
-func (m *mockGuildRepoOps) CountGuildKills(_, _ uint32) (int, error) {
+func (m *mockGuildRepo) CountGuildKills(_, _ uint32) (int, error) {
 	return m.countKills, m.countKillsErr
 }
+
+// No-op stubs for remaining GuildRepo interface methods.
+func (m *mockGuildRepo) ListAll() ([]*Guild, error)               { return nil, nil }
+func (m *mockGuildRepo) Create(_ uint32, _ string) (int32, error) { return 0, nil }
+func (m *mockGuildRepo) CreateApplicationWithMail(_, _, _ uint32, _ GuildApplicationType, _, _ uint32, _, _ string) error {
+	return nil
+}
+func (m *mockGuildRepo) CancelInvitation(_, _ uint32) error           { return nil }
+func (m *mockGuildRepo) ArrangeCharacters(_ []uint32) error           { return nil }
+func (m *mockGuildRepo) GetItemBox(_ uint32) ([]byte, error)          { return nil, nil }
+func (m *mockGuildRepo) SaveItemBox(_ uint32, _ []byte) error         { return nil }
+func (m *mockGuildRepo) SetRecruiting(_ uint32, _ bool) error         { return nil }
+func (m *mockGuildRepo) SetPugiOutfits(_ uint32, _ uint32) error      { return nil }
+func (m *mockGuildRepo) SetRecruiter(_ uint32, _ bool) error          { return nil }
+func (m *mockGuildRepo) AddMemberDailyRP(_ uint32, _ uint16) error    { return nil }
+func (m *mockGuildRepo) ExchangeEventRP(_ uint32, _ uint16) (uint32, error) { return 0, nil }
+func (m *mockGuildRepo) AddRankRP(_ uint32, _ uint16) error           { return nil }
+func (m *mockGuildRepo) AddEventRP(_ uint32, _ uint16) error          { return nil }
+func (m *mockGuildRepo) GetRoomRP(_ uint32) (uint16, error)           { return 0, nil }
+func (m *mockGuildRepo) SetRoomRP(_ uint32, _ uint16) error           { return nil }
+func (m *mockGuildRepo) AddRoomRP(_ uint32, _ uint16) error           { return nil }
+func (m *mockGuildRepo) SetRoomExpiry(_ uint32, _ time.Time) error    { return nil }
+func (m *mockGuildRepo) UpdatePost(_ uint32, _, _ string) error       { return nil }
+func (m *mockGuildRepo) UpdatePostStamp(_, _ uint32) error            { return nil }
+func (m *mockGuildRepo) GetPostLikedBy(_ uint32) (string, error)      { return "", nil }
+func (m *mockGuildRepo) SetPostLikedBy(_ uint32, _ string) error      { return nil }
+func (m *mockGuildRepo) CountNewPosts(_ uint32, _ time.Time) (int, error)   { return 0, nil }
+func (m *mockGuildRepo) ListAlliances() ([]*GuildAlliance, error)     { return nil, nil }
+func (m *mockGuildRepo) ClearTreasureHunt(_ uint32) error             { return nil }
+func (m *mockGuildRepo) InsertKillLog(_ uint32, _ int, _ uint8, _ time.Time) error { return nil }
+func (m *mockGuildRepo) ListInvitedCharacters(_ uint32) ([]*ScoutedCharacter, error) {
+	return nil, nil
+}
+func (m *mockGuildRepo) RolloverDailyRP(_ uint32, _ time.Time) error { return nil }
+func (m *mockGuildRepo) AddWeeklyBonusUsers(_ uint32, _ uint8) error { return nil }
 
 // --- mockUserRepoForItems ---
 

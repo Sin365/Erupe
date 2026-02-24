@@ -11,7 +11,7 @@ import (
 
 func TestOperateGuild_Disband_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsLeader: true, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -44,7 +44,7 @@ func TestOperateGuild_Disband_Success(t *testing.T) {
 
 func TestOperateGuild_Disband_NotLeader(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 5},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -74,7 +74,7 @@ func TestOperateGuild_Disband_NotLeader(t *testing.T) {
 
 func TestOperateGuild_Disband_RepoError(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsLeader: true, OrderIndex: 1},
 		disbandErr: errNotFound,
 	}
@@ -102,7 +102,7 @@ func TestOperateGuild_Disband_RepoError(t *testing.T) {
 
 func TestOperateGuild_Resign_TransferLeadership(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsLeader: true, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -142,7 +142,7 @@ func TestOperateGuild_Resign_TransferLeadership(t *testing.T) {
 
 func TestOperateGuild_Resign_SkipsAvoidLeadership(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsLeader: true, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -171,7 +171,7 @@ func TestOperateGuild_Resign_SkipsAvoidLeadership(t *testing.T) {
 
 func TestOperateGuild_Apply_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 5},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -200,7 +200,7 @@ func TestOperateGuild_Apply_Success(t *testing.T) {
 
 func TestOperateGuild_Apply_RepoError(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership:   &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 5},
 		createAppErr: errNotFound,
 	}
@@ -228,7 +228,7 @@ func TestOperateGuild_Apply_RepoError(t *testing.T) {
 func TestOperateGuild_Leave_AsApplicant(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsApplicant: true, OrderIndex: 5},
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}
@@ -257,7 +257,7 @@ func TestOperateGuild_Leave_AsApplicant(t *testing.T) {
 func TestOperateGuild_Leave_AsMember(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsApplicant: false, OrderIndex: 5},
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}
@@ -289,7 +289,7 @@ func TestOperateGuild_Leave_AsMember(t *testing.T) {
 func TestOperateGuild_Leave_MailError(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{sendErr: errNotFound}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsApplicant: false, OrderIndex: 5},
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}
@@ -317,7 +317,7 @@ func TestOperateGuild_Leave_MailError(t *testing.T) {
 
 func TestOperateGuild_UpdateComment_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsLeader: true, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -341,7 +341,7 @@ func TestOperateGuild_UpdateComment_Success(t *testing.T) {
 
 func TestOperateGuild_UpdateComment_NotLeader(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 10}, // not leader, not sub-leader
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -370,7 +370,7 @@ func TestOperateGuild_UpdateComment_NotLeader(t *testing.T) {
 
 func TestOperateGuild_UpdateMotto_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsLeader: true, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -400,7 +400,7 @@ func TestOperateGuild_UpdateMotto_Success(t *testing.T) {
 
 func TestOperateGuild_UpdateMotto_NotLeader(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 10},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -423,7 +423,7 @@ func TestOperateGuild_UpdateMotto_NotLeader(t *testing.T) {
 
 func TestOperateGuild_GuildNotFound(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.getErr = errNotFound
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
@@ -449,7 +449,7 @@ func TestOperateGuild_GuildNotFound(t *testing.T) {
 func TestOperateGuildMember_Accept(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsLeader: true, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}
@@ -488,7 +488,7 @@ func TestOperateGuildMember_Accept(t *testing.T) {
 func TestOperateGuildMember_Reject(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsLeader: true, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}
@@ -518,7 +518,7 @@ func TestOperateGuildMember_Reject(t *testing.T) {
 func TestOperateGuildMember_Kick(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsLeader: true, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}
@@ -548,7 +548,7 @@ func TestOperateGuildMember_Kick(t *testing.T) {
 func TestOperateGuildMember_MailError(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{sendErr: errNotFound}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, IsLeader: true, OrderIndex: 1},
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}
@@ -577,7 +577,7 @@ func TestOperateGuildMember_MailError(t *testing.T) {
 
 func TestOperateGuildMember_NotLeaderOrSub(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 10}, // not sub-leader
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}

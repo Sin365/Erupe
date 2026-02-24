@@ -11,7 +11,7 @@ import (
 func TestAnswerGuildScout_Accept(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		application: &GuildApplication{GuildID: 10, CharID: 1},
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}
@@ -46,7 +46,7 @@ func TestAnswerGuildScout_Accept(t *testing.T) {
 func TestAnswerGuildScout_Decline(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		application: &GuildApplication{GuildID: 10, CharID: 1},
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}
@@ -74,7 +74,7 @@ func TestAnswerGuildScout_Decline(t *testing.T) {
 
 func TestAnswerGuildScout_GuildNotFound(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.getErr = errNotFound
 	server.guildRepo = guildMock
 	server.mailRepo = &mockMailRepo{}
@@ -100,7 +100,7 @@ func TestAnswerGuildScout_GuildNotFound(t *testing.T) {
 func TestAnswerGuildScout_ApplicationMissing(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		application: nil, // no application found
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}
@@ -133,7 +133,7 @@ func TestAnswerGuildScout_ApplicationMissing(t *testing.T) {
 func TestAnswerGuildScout_MailError(t *testing.T) {
 	server := createMockServer()
 	mailMock := &mockMailRepo{sendErr: errNotFound}
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		application: &GuildApplication{GuildID: 10, CharID: 1},
 	}
 	guildMock.guild = &Guild{ID: 10, Name: "TestGuild"}

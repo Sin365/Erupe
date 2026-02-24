@@ -109,7 +109,7 @@ The `GuildRepo` interface has 68 methods. Neither mock implements the full inter
 
 **Fix:** Merge into a single `mockGuildRepo` with all 68 methods as no-op defaults. Use struct fields (as `mockGuildRepoOps` already does for ~15 methods) for configurable returns in tests that need specific behavior.
 
-**Status:** Pending.
+**Status:** **Done.** Merged into a single `mockGuildRepo` (936 lines, down from 1004). All 12 test files updated. Adding a new `GuildRepo` method now requires a single stub addition.
 
 ---
 

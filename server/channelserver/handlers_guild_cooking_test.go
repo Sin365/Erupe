@@ -11,7 +11,7 @@ import (
 
 func TestLoadGuildCooking_NoMeals(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		meals: []*GuildMeal{},
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -31,7 +31,7 @@ func TestLoadGuildCooking_NoMeals(t *testing.T) {
 
 func TestLoadGuildCooking_WithActiveMeals(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		meals: []*GuildMeal{
 			{ID: 1, MealID: 100, Level: 3, CreatedAt: TimeAdjusted()},                     // active (within 60 min)
 			{ID: 2, MealID: 200, Level: 1, CreatedAt: TimeAdjusted().Add(-2 * time.Hour)}, // expired
@@ -57,7 +57,7 @@ func TestLoadGuildCooking_WithActiveMeals(t *testing.T) {
 
 func TestLoadGuildCooking_DBError(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		listMealsErr: errNotFound,
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -79,7 +79,7 @@ func TestLoadGuildCooking_DBError(t *testing.T) {
 
 func TestRegistGuildCooking_NewMeal(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		createdMealID: 42,
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -107,7 +107,7 @@ func TestRegistGuildCooking_NewMeal(t *testing.T) {
 
 func TestRegistGuildCooking_UpdateMeal(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.guild = &Guild{ID: 10}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
@@ -130,7 +130,7 @@ func TestRegistGuildCooking_UpdateMeal(t *testing.T) {
 
 func TestRegistGuildCooking_CreateError(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		createMealErr: errNotFound,
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -158,7 +158,7 @@ func TestRegistGuildCooking_CreateError(t *testing.T) {
 
 func TestGuildHuntdata_Acquire(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.guild = &Guild{ID: 10}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
@@ -184,7 +184,7 @@ func TestGuildHuntdata_Acquire(t *testing.T) {
 
 func TestGuildHuntdata_Enumerate(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		guildKills: []*GuildKill{
 			{ID: 1, Monster: 100},
 			{ID: 2, Monster: 200},
@@ -214,7 +214,7 @@ func TestGuildHuntdata_Enumerate(t *testing.T) {
 
 func TestGuildHuntdata_Check_HasKills(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		countKills: 5,
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -238,7 +238,7 @@ func TestGuildHuntdata_Check_HasKills(t *testing.T) {
 
 func TestGuildHuntdata_Check_NoKills(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		countKills: 0,
 	}
 	guildMock.guild = &Guild{ID: 10}
@@ -264,7 +264,7 @@ func TestGuildHuntdata_Check_NoKills(t *testing.T) {
 
 func TestAddGuildWeeklyBonusExceptionalUser_Success(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.guild = &Guild{ID: 10}
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
@@ -285,7 +285,7 @@ func TestAddGuildWeeklyBonusExceptionalUser_Success(t *testing.T) {
 
 func TestAddGuildWeeklyBonusExceptionalUser_NoGuild(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.getErr = errNotFound
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)

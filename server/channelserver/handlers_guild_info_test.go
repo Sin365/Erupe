@@ -20,7 +20,7 @@ func guildInfoServer() *Server {
 
 func TestInfoGuild_ByGuildID(t *testing.T) {
 	server := guildInfoServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 1, IsLeader: true},
 	}
 	joined := time.Now()
@@ -58,7 +58,7 @@ func TestInfoGuild_ByGuildID(t *testing.T) {
 
 func TestInfoGuild_ByCharID(t *testing.T) {
 	server := guildInfoServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 5},
 	}
 	guildMock.guild = &Guild{
@@ -89,7 +89,7 @@ func TestInfoGuild_ByCharID(t *testing.T) {
 
 func TestInfoGuild_NotFound(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.getErr = errNotFound
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
@@ -107,7 +107,7 @@ func TestInfoGuild_NotFound(t *testing.T) {
 
 func TestInfoGuild_MembershipError(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		getMemberErr: errNotFound,
 	}
 	guildMock.guild = &Guild{
@@ -134,7 +134,7 @@ func TestInfoGuild_MembershipError(t *testing.T) {
 
 func TestInfoGuild_WithAlliance(t *testing.T) {
 	server := guildInfoServer()
-	guildMock := &mockGuildRepoOps{
+	guildMock := &mockGuildRepo{
 		membership: &GuildMember{GuildID: 10, CharID: 1, OrderIndex: 1, IsLeader: true},
 		alliance: &GuildAlliance{
 			ID:            5,
@@ -175,7 +175,7 @@ func TestInfoGuild_WithAlliance(t *testing.T) {
 
 func TestEnumerateGuild_ByName(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.guild = nil
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)
@@ -202,7 +202,7 @@ func TestEnumerateGuild_ByName(t *testing.T) {
 
 func TestEnumerateGuild_NoResults(t *testing.T) {
 	server := createMockServer()
-	guildMock := &mockGuildRepoOps{}
+	guildMock := &mockGuildRepo{}
 	guildMock.getErr = errNotFound
 	server.guildRepo = guildMock
 	session := createMockSession(1, server)

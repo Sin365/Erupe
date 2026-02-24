@@ -101,7 +101,7 @@ func TestMailService_SendGuildInvite(t *testing.T) {
 
 func TestMailService_BroadcastToGuild(t *testing.T) {
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoForMail{
+	guildMock := &mockGuildRepo{
 		members: []*GuildMember{
 			{CharID: 100},
 			{CharID: 200},
@@ -132,7 +132,7 @@ func TestMailService_BroadcastToGuild(t *testing.T) {
 
 func TestMailService_BroadcastToGuild_GetMembersError(t *testing.T) {
 	mailMock := &mockMailRepo{}
-	guildMock := &mockGuildRepoForMail{getMembersErr: errors.New("db fail")}
+	guildMock := &mockGuildRepo{getMembersErr: errors.New("db fail")}
 	logger, _ := zap.NewDevelopment()
 	svc := NewMailService(mailMock, guildMock, logger)
 
@@ -147,7 +147,7 @@ func TestMailService_BroadcastToGuild_GetMembersError(t *testing.T) {
 
 func TestMailService_BroadcastToGuild_SendError(t *testing.T) {
 	mailMock := &mockMailRepo{sendErr: errors.New("db fail")}
-	guildMock := &mockGuildRepoForMail{
+	guildMock := &mockGuildRepo{
 		members: []*GuildMember{
 			{CharID: 100},
 		},

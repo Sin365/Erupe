@@ -122,7 +122,7 @@ func TestGuildService_OperateMember(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			guildMock := &mockGuildRepoOps{
+			guildMock := &mockGuildRepo{
 				membership: tt.membership,
 				acceptErr:  tt.acceptErr,
 				rejectErr:  tt.rejectErr,
@@ -208,7 +208,7 @@ func TestGuildService_Disband(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			guildMock := &mockGuildRepoOps{disbandErr: tt.disbandErr}
+			guildMock := &mockGuildRepo{disbandErr: tt.disbandErr}
 			guildMock.guild = tt.guild
 			svc := newTestGuildService(guildMock, &mockMailRepo{})
 
@@ -284,7 +284,7 @@ func TestGuildService_ResignLeadership(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			guildMock := &mockGuildRepoOps{getMembersErr: tt.getMembersErr}
+			guildMock := &mockGuildRepo{getMembersErr: tt.getMembersErr}
 			guildMock.guild = tt.guild
 			guildMock.members = tt.members
 			svc := newTestGuildService(guildMock, &mockMailRepo{})
@@ -356,7 +356,7 @@ func TestGuildService_Leave(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			guildMock := &mockGuildRepoOps{
+			guildMock := &mockGuildRepo{
 				rejectErr: tt.rejectErr,
 				removeErr: tt.removeErr,
 			}
@@ -422,7 +422,7 @@ func TestGuildService_PostScout(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			guildMock := &mockGuildRepoOps{
+			guildMock := &mockGuildRepo{
 				membership:   tt.membership,
 				hasAppResult: tt.hasApp,
 				hasAppErr:    tt.hasAppErr,
@@ -526,7 +526,7 @@ func TestGuildService_AnswerScout(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			guildMock := &mockGuildRepoOps{
+			guildMock := &mockGuildRepo{
 				application: tt.application,
 				acceptErr:   tt.acceptErr,
 				rejectErr:   tt.rejectErr,
