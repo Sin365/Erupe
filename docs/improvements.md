@@ -135,4 +135,4 @@ Tests for those handlers either use stub handlers that skip repos or rely on int
 
 **Fix:** Extract to package-level `var` declarations or a dedicated data file (following the pattern of `handlers_data_paper_tables.go`).
 
-**Status:** Pending.
+**Status:** **Done.** Extracted 3 inline data tables (LB prices, wanted list, GZ prices) and their anonymous struct types to `handlers_items_tables.go`. Handler function reduced from 164 to 35 lines.
