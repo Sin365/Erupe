@@ -123,7 +123,7 @@ Tests for those handlers either use stub handlers that skip repos or rely on int
 
 **Fix:** Add no-op mock implementations for each, following the pattern established by existing mocks.
 
-**Status:** Pending.
+**Status:** **Done.** Added 8 mock implementations to `repo_mocks_test.go`: `mockTowerRepo`, `mockFestaRepo`, `mockRengokuRepo`, `mockDivaRepo`, `mockEventRepo`, `mockMiscRepo`, `mockMercenaryRepo`, `mockCafeRepo`. All follow the established pattern with no-op defaults and configurable struct fields for return values and errors.
 
 ---
 
