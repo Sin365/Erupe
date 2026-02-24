@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Catch-up migration (`0002_catch_up_patches.sql`) for databases with partially-applied patch schemas — idempotent no-op on fresh or fully-patched databases, fills gaps for partial installations
 - Embedded auto-migrating database schema system (`server/migrations/`): the server binary now contains all SQL schemas and runs migrations automatically on startup — no more `pg_restore`, manual patch ordering, or external `schemas/` directory needed
 - Setup wizard: web-based first-run configuration at `http://localhost:8080` when `config.json` is missing — guides users through database connection, schema initialization, and server settings
 - CI: Coverage threshold enforcement — fails build if total coverage drops below 50%
