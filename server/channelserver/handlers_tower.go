@@ -307,7 +307,7 @@ func handleMsgMhfGetTenrouirai(s *Session, p mhfpacket.MHFPacket) {
 			data = append(data, bf)
 		}
 	case 4:
-		progress, err := s.server.towerRepo.GetTenrouiraiProgress(pkt.GuildID)
+		progress, err := s.server.towerService.GetTenrouiraiProgressCapped(pkt.GuildID)
 		if err != nil {
 			s.logger.Error("Failed to read tower mission page", zap.Error(err))
 		} else {
@@ -315,19 +315,6 @@ func handleMsgMhfGetTenrouirai(s *Session, p mhfpacket.MHFPacket) {
 			tenrouirai.Progress[0].Mission1 = progress.Mission1
 			tenrouirai.Progress[0].Mission2 = progress.Mission2
 			tenrouirai.Progress[0].Mission3 = progress.Mission3
-		}
-
-		if tenrouirai.Progress[0].Page < 1 {
-			tenrouirai.Progress[0].Page = 1
-		}
-		if tenrouirai.Progress[0].Mission1 > tenrouiraiData[(tenrouirai.Progress[0].Page*3)-3].Goal {
-			tenrouirai.Progress[0].Mission1 = tenrouiraiData[(tenrouirai.Progress[0].Page*3)-3].Goal
-		}
-		if tenrouirai.Progress[0].Mission2 > tenrouiraiData[(tenrouirai.Progress[0].Page*3)-2].Goal {
-			tenrouirai.Progress[0].Mission2 = tenrouiraiData[(tenrouirai.Progress[0].Page*3)-2].Goal
-		}
-		if tenrouirai.Progress[0].Mission3 > tenrouiraiData[(tenrouirai.Progress[0].Page*3)-1].Goal {
-			tenrouirai.Progress[0].Mission3 = tenrouiraiData[(tenrouirai.Progress[0].Page*3)-1].Goal
 		}
 
 		for _, progress := range tenrouirai.Progress {
@@ -384,33 +371,18 @@ func handleMsgMhfPostTenrouirai(s *Session, p mhfpacket.MHFPacket) {
 	}
 
 	if pkt.Op == 2 {
-		page, donated, err := s.server.towerRepo.GetGuildTowerPageAndRP(pkt.GuildID)
-		if err != nil {
-			s.logger.Error("Failed to read guild tower state for donation", zap.Error(err))
-			doAckSimpleSucceed(s, pkt.AckHandle, make([]byte, 4))
-			return
-		}
-
-		var requirement int
-		for i := 0; i < (page*3)+1; i++ {
-			requirement += int(tenrouiraiData[i].Cost)
-		}
-
 		bf := byteframe.NewByteFrame()
 
 		sd, err := GetCharacterSaveData(s, s.charID)
 		if err == nil && sd != nil {
 			sd.RP -= pkt.DonatedRP
 			sd.Save(s)
-			if donated+int(pkt.DonatedRP) >= requirement {
-				if err := s.server.towerRepo.AdvanceTenrouiraiPage(pkt.GuildID); err != nil {
-					s.logger.Error("Failed to advance tower mission page", zap.Error(err))
-				}
-				pkt.DonatedRP = uint16(requirement - donated)
-			}
-			bf.WriteUint32(uint32(pkt.DonatedRP))
-			if err := s.server.towerRepo.DonateGuildTowerRP(pkt.GuildID, pkt.DonatedRP); err != nil {
-				s.logger.Error("Failed to update guild tower RP", zap.Error(err))
+			result, err := s.server.towerService.DonateGuildTowerRP(pkt.GuildID, pkt.DonatedRP)
+			if err != nil {
+				s.logger.Error("Failed to process tower RP donation", zap.Error(err))
+				bf.WriteUint32(0)
+			} else {
+				bf.WriteUint32(uint32(result.ActualDonated))
 			}
 		} else {
 			bf.WriteUint32(0)
@@ -509,7 +481,7 @@ func handleMsgMhfPostGemInfo(s *Session, p mhfpacket.MHFPacket) {
 	switch pkt.Op {
 	case 1: // Add gem
 		i := int((pkt.Gem >> 8 * 5) + (pkt.Gem - pkt.Gem&0xFF00 - 1%5))
-		if err := s.server.towerRepo.AddGem(s.charID, i, int(pkt.Quantity)); err != nil {
+		if err := s.server.towerService.AddGem(s.charID, i, int(pkt.Quantity)); err != nil {
 			s.logger.Error("Failed to update tower gems", zap.Error(err))
 		}
 	case 2: // Transfer gem

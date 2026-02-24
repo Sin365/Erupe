@@ -78,6 +78,11 @@ func ensureGachaService(s *Server) {
 	s.gachaService = NewGachaService(s.gachaRepo, s.userRepo, s.charRepo, s.logger, 100000)
 }
 
+// ensureTowerService wires the TowerService from the server's current repos.
+func ensureTowerService(s *Server) {
+	s.towerService = NewTowerService(s.towerRepo, s.logger)
+}
+
 // createMockSession creates a minimal Session for testing.
 // Imported from v9.2.x-stable and adapted for main.
 func createMockSession(charID uint32, server *Server) *Session {

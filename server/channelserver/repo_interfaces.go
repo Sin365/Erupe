@@ -210,7 +210,6 @@ type TowerRepo interface {
 	UpdateProgress(charID uint32, tr, trp, cost, block1 int32) error
 	GetGems(charID uint32) (string, error)
 	UpdateGems(charID uint32, gems string) error
-	AddGem(charID uint32, gemIndex int, quantity int) error
 	GetTenrouiraiProgress(guildID uint32) (TenrouiraiProgressData, error)
 	GetTenrouiraiMissionScores(guildID uint32, missionIndex uint8) ([]TenrouiraiCharScore, error)
 	GetGuildTowerRP(guildID uint32) (uint32, error)

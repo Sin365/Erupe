@@ -944,6 +944,7 @@ type mockTowerRepo struct {
 	skillsErr    error
 	gems         string
 	gemsErr      error
+	updatedGems  string
 
 	progress    TenrouiraiProgressData
 	progressErr error
@@ -951,9 +952,13 @@ type mockTowerRepo struct {
 	scoresErr   error
 	guildRP     uint32
 	guildRPErr  error
-	page        int
-	donated     int
-	pageRPErr   error
+	page           int
+	donated        int
+	pageRPErr      error
+	advanceErr     error
+	advanceCalled  bool
+	donateErr      error
+	donatedRP      uint16
 }
 
 func (m *mockTowerRepo) GetTowerData(_ uint32) (TowerData, error)   { return m.towerData, m.towerDataErr }
@@ -961,8 +966,10 @@ func (m *mockTowerRepo) GetSkills(_ uint32) (string, error)         { return m.s
 func (m *mockTowerRepo) UpdateSkills(_ uint32, _ string, _ int32) error { return nil }
 func (m *mockTowerRepo) UpdateProgress(_ uint32, _, _, _, _ int32) error { return nil }
 func (m *mockTowerRepo) GetGems(_ uint32) (string, error)           { return m.gems, m.gemsErr }
-func (m *mockTowerRepo) UpdateGems(_ uint32, _ string) error        { return nil }
-func (m *mockTowerRepo) AddGem(_ uint32, _ int, _ int) error        { return nil }
+func (m *mockTowerRepo) UpdateGems(_ uint32, gems string) error {
+	m.updatedGems = gems
+	return nil
+}
 func (m *mockTowerRepo) GetTenrouiraiProgress(_ uint32) (TenrouiraiProgressData, error) {
 	return m.progress, m.progressErr
 }
@@ -973,8 +980,14 @@ func (m *mockTowerRepo) GetGuildTowerRP(_ uint32) (uint32, error) { return m.gui
 func (m *mockTowerRepo) GetGuildTowerPageAndRP(_ uint32) (int, int, error) {
 	return m.page, m.donated, m.pageRPErr
 }
-func (m *mockTowerRepo) AdvanceTenrouiraiPage(_ uint32) error       { return nil }
-func (m *mockTowerRepo) DonateGuildTowerRP(_ uint32, _ uint16) error { return nil }
+func (m *mockTowerRepo) AdvanceTenrouiraiPage(_ uint32) error {
+	m.advanceCalled = true
+	return m.advanceErr
+}
+func (m *mockTowerRepo) DonateGuildTowerRP(_ uint32, rp uint16) error {
+	m.donatedRP = rp
+	return m.donateErr
+}
 
 // --- mockFestaRepo ---
 

@@ -3,8 +3,6 @@ package channelserver
 import (
 	"fmt"
 
-	"erupe-ce/common/stringsupport"
-
 	"github.com/jmoiron/sqlx"
 )
 
@@ -76,16 +74,6 @@ func (r *TowerRepository) GetGems(charID uint32) (string, error) {
 func (r *TowerRepository) UpdateGems(charID uint32, gems string) error {
 	_, err := r.db.Exec(`UPDATE tower SET gems=$1 WHERE char_id=$2`, gems, charID)
 	return err
-}
-
-// AddGem adds quantity to a specific gem index.
-func (r *TowerRepository) AddGem(charID uint32, gemIndex int, quantity int) error {
-	gems, err := r.GetGems(charID)
-	if err != nil {
-		return err
-	}
-	newGems := stringsupport.CSVSetIndex(gems, gemIndex, stringsupport.CSVGetIndex(gems, gemIndex)+quantity)
-	return r.UpdateGems(charID, newGems)
 }
 
 // TenrouiraiProgressData holds the guild's tenrouirai (sky corridor) progress.
