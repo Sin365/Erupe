@@ -1,70 +1,58 @@
-# Docker for erupe
+# Docker for Erupe
 
-## Building the container
-Run the following from the route of the source folder. In this example we give it the tag of dev to seperate it from any other container verions. 
+## Quick Start
+
+1. From the repository root, copy and edit the config:
+
+   ```bash
+   cp config.example.json docker/config.json
+   ```
+
+   Edit `docker/config.json` — set `Database.Host` to `"db"` and `Database.Password` to match `docker-compose.yml` (default: `password`). The example config is minimal; see `config.reference.json` for all available options.
+
+2. Place your [quest/scenario files](https://files.catbox.moe/xf0l7w.7z) in `docker/bin/`.
+
+3. Start everything:
+
+   ```bash
+   cd docker
+   docker compose up
+   ```
+
+The database schema is automatically applied on first start via the embedded migration system.
+
+pgAdmin is available at `http://localhost:5050` (default login: `user@pgadmin.com` / `password`).
+
+## Building Locally
+
+By default the server service pulls the prebuilt image from GHCR. To build from source instead, edit `docker-compose.yml`: comment out the `image` line and uncomment the `build` section, then:
+
 ```bash
-docker build . -t erupe:dev
+docker compose up --build
 ```
-## Running the container in isolation
-This is just running the container. You can do volume mounts into the container for the `config.json` to tell it to communicate to a database. You will need to do this also for other folders such as `bin` and `savedata`
+
+## Stopping the Server
+
 ```bash
-docker run erupe:dev
+docker compose stop     # Stop containers (preserves data)
+docker compose down     # Stop and remove containers (preserves data volumes)
 ```
 
-## Docker compose
-Docker compose allows you to run multiple containers at once. The docker compose in this folder has 3 things set up.
-- postgres
-- pg admin (Admin interface to make db changes)
-- erupe
+To delete all persistent data, remove these directories after stopping:
 
-We automatically populate the database to the latest version on start. If you you are updating you will need to apply the new schemas manually.
+- `docker/db-data/`
+- `docker/savedata/`
 
-Before we get started you should make sure the database info matches whats in the docker compose file for the environment variables `POSTGRES_PASSWORD`,`POSTGRES_USER` and `POSTGRES_DB`. You can set the host to be the service name `db`.
+## Updating
 
-Here is a example of what you would put in the config.json if you was to leave the defaults. It is strongly recommended to change the password. 
-```txt
-"Database": {
-    "Host": "db",
-    "Port": 5432,
-    "User": "postgres",
-    "Password": "password",
-    "Database": "erupe"
-  },
-```
+After pulling new changes, rebuild and restart. Schema migrations are applied automatically on startup.
 
-Place this file within ./docker/config.json
-
-You will need to do the same for your bins place these in ./docker/bin
-
-# Setting up the web hosted materials
-Clone the Severs repo into ./docker/Severs
-
-Make sure your hosts are pointing to where this is hosted
-
-
-
-## Turning off the server safely
 ```bash
-docker-compose stop
+docker compose down
+docker compose build
+docker compose up
 ```
 
-## Turning off the server destructive
-```bash
-docker-compose down
-```
-Make sure if you want to delete your data you delete the folders that persisted
-- ./docker/savedata
-- ./docker/db-data
-## Turning on the server again 
-This boots the db pgadmin and the server in a detached state
-```bash
-docker-compose up -d
-```
-if you want all the logs and you want it to be in an attached state 
-```bash
-docker-compose up
-```
+## Troubleshooting
 
-
-# Troubleshooting
-Q: My Postgres will not populate. A: You're setup.sh is maybe saved as CRLF it needs to be saved as LF. 
+**Postgres won't start on Windows**: Ensure `docker/db-data/` doesn't contain stale data from a different PostgreSQL version. Delete it and restart to reinitialize.

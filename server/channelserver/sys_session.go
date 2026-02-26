@@ -4,11 +4,11 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"erupe-ce/common/mhfcourse"
-	_config "erupe-ce/config"
 	"fmt"
 	"io"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"erupe-ce/common/byteframe"
@@ -16,6 +16,7 @@ import (
 	"erupe-ce/network"
 	"erupe-ce/network/clientctx"
 	"erupe-ce/network/mhfpacket"
+	"erupe-ce/network/pcap"
 
 	"go.uber.org/zap"
 )
@@ -31,18 +32,21 @@ type Session struct {
 	logger        *zap.Logger
 	server        *Server
 	rawConn       net.Conn
-	cryptConn     *network.CryptConn
+	cryptConn     network.Conn
 	sendPackets   chan packet
 	clientContext *clientctx.ClientContext
 	lastPacket    time.Time
 
-	objectIndex      uint16
-	userEnteredStage bool // If the user has entered a stage before
+	objectID    uint16
+	objectIndex uint16
+	loaded      bool
+
 	stage            *Stage
 	reservationStage *Stage // Required for the stateful MsgSysUnreserveStage packet.
 	stagePass        string // Temporary storage
 	prevGuildID      uint32 // Stores the last GuildID used in InfoGuild
 	charID           uint32
+	userID           uint32
 	logKey           []byte
 	sessionStart     int64
 	courses          []mhfcourse.Course
@@ -67,28 +71,35 @@ type Session struct {
 	// Contains the mail list that maps accumulated indexes to mail IDs
 	mailList []int
 
-	// For Debuging
-	Name     string
-	closed   bool
-	ackStart map[uint32]time.Time
+	Name           string
+	closed         atomic.Bool
+	ackStart       map[uint32]time.Time
+	captureConn    *pcap.RecordingConn // non-nil when capture is active
+	captureCleanup func()              // Called on session close to flush/close capture file
 }
 
 // NewSession creates a new Session type.
 func NewSession(server *Server, conn net.Conn) *Session {
+	var cryptConn network.Conn = network.NewCryptConn(conn, server.erupeConfig.RealClientMode, server.logger.Named(conn.RemoteAddr().String()))
+
+	cryptConn, captureConn, captureCleanup := startCapture(server, cryptConn, conn.RemoteAddr(), pcap.ServerTypeChannel)
+
 	s := &Session{
 		logger:         server.logger.Named(conn.RemoteAddr().String()),
 		server:         server,
 		rawConn:        conn,
-		cryptConn:      network.NewCryptConn(conn),
+		cryptConn:      cryptConn,
 		sendPackets:    make(chan packet, 20),
-		clientContext:  &clientctx.ClientContext{}, // Unused
+		clientContext:  &clientctx.ClientContext{RealClientMode: server.erupeConfig.RealClientMode},
 		lastPacket:     time.Now(),
+		objectID:       server.getObjectId(),
 		sessionStart:   TimeAdjusted().Unix(),
 		stageMoveStack: stringstack.New(),
 		ackStart:       make(map[uint32]time.Time),
 		semaphoreID:    make([]uint16, 2),
+		captureConn:    captureConn,
+		captureCleanup: captureCleanup,
 	}
-	s.SetObjectID()
 	return s
 }
 
@@ -103,18 +114,19 @@ func (s *Session) Start() {
 
 // QueueSend queues a packet (raw []byte) to be sent.
 func (s *Session) QueueSend(data []byte) {
-	s.logMessage(binary.BigEndian.Uint16(data[0:2]), data, "Server", s.Name)
-	err := s.cryptConn.SendPacket(append(data, []byte{0x00, 0x10}...))
-	if err != nil {
-		s.logger.Warn("Failed to send packet")
+	if len(data) >= 2 {
+		s.logMessage(binary.BigEndian.Uint16(data[0:2]), data, "Server", s.Name)
 	}
+	s.sendPackets <- packet{data, true}
 }
 
 // QueueSendNonBlocking queues a packet (raw []byte) to be sent, dropping the packet entirely if the queue is full.
 func (s *Session) QueueSendNonBlocking(data []byte) {
 	select {
 	case s.sendPackets <- packet{data, true}:
-		s.logMessage(binary.BigEndian.Uint16(data[0:2]), data, "Server", s.Name)
+		if len(data) >= 2 {
+			s.logMessage(binary.BigEndian.Uint16(data[0:2]), data, "Server", s.Name)
+		}
 	default:
 		s.logger.Warn("Packet queue too full, dropping!")
 	}
@@ -127,7 +139,7 @@ func (s *Session) QueueSendMHF(pkt mhfpacket.MHFPacket) {
 	bf.WriteUint16(uint16(pkt.Opcode()))
 
 	// Build the packet onto the byteframe.
-	pkt.Build(bf, s.clientContext)
+	_ = pkt.Build(bf, s.clientContext)
 
 	// Queue it.
 	s.QueueSend(bf.Data())
@@ -140,7 +152,7 @@ func (s *Session) QueueSendMHFNonBlocking(pkt mhfpacket.MHFPacket) {
 	bf.WriteUint16(uint16(pkt.Opcode()))
 
 	// Build the packet onto the byteframe.
-	pkt.Build(bf, s.clientContext)
+	_ = pkt.Build(bf, s.clientContext)
 
 	// Queue it.
 	s.QueueSendNonBlocking(bf.Data())
@@ -156,44 +168,62 @@ func (s *Session) QueueAck(ackHandle uint32, data []byte) {
 }
 
 func (s *Session) sendLoop() {
-	var pkt packet
 	for {
-		var buf []byte
-		if s.closed {
+		if s.closed.Load() {
 			return
 		}
+		// Send each packet individually with its own terminator
 		for len(s.sendPackets) > 0 {
-			pkt = <-s.sendPackets
-			buf = append(buf, pkt.data...)
-		}
-		if len(buf) > 0 {
-			err := s.cryptConn.SendPacket(append(buf, []byte{0x00, 0x10}...))
+			pkt := <-s.sendPackets
+			err := s.cryptConn.SendPacket(append(pkt.data, []byte{0x00, 0x10}...))
 			if err != nil {
-				s.logger.Warn("Failed to send packet")
+				s.logger.Warn("Failed to send packet", zap.Error(err))
 			}
 		}
-		time.Sleep(time.Duration(_config.ErupeConfig.LoopDelay) * time.Millisecond)
+		time.Sleep(time.Duration(s.server.erupeConfig.LoopDelay) * time.Millisecond)
 	}
 }
 
 func (s *Session) recvLoop() {
 	for {
-		if s.closed {
+		if s.closed.Load() {
+			// Graceful disconnect - client sent logout packet
+			s.logger.Info("Session closed gracefully",
+				zap.Uint32("charID", s.charID),
+				zap.String("name", s.Name),
+				zap.String("disconnect_type", "graceful"),
+			)
 			logoutPlayer(s)
 			return
 		}
 		pkt, err := s.cryptConn.ReadPacket()
 		if err == io.EOF {
-			s.logger.Info(fmt.Sprintf("[%s] Disconnected", s.Name))
+			// Connection lost - client disconnected without logout packet
+			sessionDuration := time.Duration(0)
+			if s.sessionStart > 0 {
+				sessionDuration = time.Since(time.Unix(s.sessionStart, 0))
+			}
+			s.logger.Info("Connection lost (EOF)",
+				zap.Uint32("charID", s.charID),
+				zap.String("name", s.Name),
+				zap.String("disconnect_type", "connection_lost"),
+				zap.Duration("session_duration", sessionDuration),
+			)
 			logoutPlayer(s)
 			return
 		} else if err != nil {
-			s.logger.Warn("Error on ReadPacket, exiting recv loop", zap.Error(err))
+			// Connection error - network issue or malformed packet
+			s.logger.Warn("Connection error, exiting recv loop",
+				zap.Error(err),
+				zap.Uint32("charID", s.charID),
+				zap.String("name", s.Name),
+				zap.String("disconnect_type", "error"),
+			)
 			logoutPlayer(s)
 			return
 		}
 		s.handlePacketGroup(pkt)
-		time.Sleep(time.Duration(_config.ErupeConfig.LoopDelay) * time.Millisecond)
+		time.Sleep(time.Duration(s.server.erupeConfig.LoopDelay) * time.Millisecond)
 	}
 }
 
@@ -203,38 +233,53 @@ func (s *Session) handlePacketGroup(pktGroup []byte) {
 	opcodeUint16 := bf.ReadUint16()
 	if len(bf.Data()) >= 6 {
 		s.ackStart[bf.ReadUint32()] = time.Now()
-		bf.Seek(2, io.SeekStart)
+		_, _ = bf.Seek(2, io.SeekStart)
 	}
 	opcode := network.PacketID(opcodeUint16)
 
 	// This shouldn't be needed, but it's better to recover and let the connection die than to panic the server.
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("[%s]", s.Name)
-			fmt.Println("Recovered from panic", r)
+			s.logger.Error("Recovered from panic", zap.String("name", s.Name), zap.Any("panic", r))
 		}
 	}()
 
 	s.logMessage(opcodeUint16, pktGroup, s.Name, "Server")
 
 	if opcode == network.MSG_SYS_LOGOUT {
-		s.closed = true
+		s.closed.Store(true)
 		return
 	}
 	// Get the packet parser and handler for this opcode.
 	mhfPkt := mhfpacket.FromOpcode(opcode)
 	if mhfPkt == nil {
-		fmt.Println("Got opcode which we don't know how to parse, can't parse anymore for this group")
+		s.logger.Warn("Got opcode which we don't know how to parse, can't parse anymore for this group")
 		return
 	}
 	// Parse the packet.
 	err := mhfPkt.Parse(bf, s.clientContext)
 	if err != nil {
-		fmt.Printf("\n!!! [%s] %s NOT IMPLEMENTED !!! \n\n\n", s.Name, opcode)
+		s.logger.Warn("Packet not implemented",
+			zap.String("name", s.Name),
+			zap.Stringer("opcode", opcode),
+		)
+		return
+	}
+	if bf.Err() != nil {
+		s.logger.Warn("Malformed packet (read overflow during parse)",
+			zap.String("name", s.Name),
+			zap.Stringer("opcode", opcode),
+			zap.Error(bf.Err()),
+		)
 		return
 	}
 	// Handle the packet.
-	handlerTable[opcode](s, mhfPkt)
+	handler, ok := s.server.handlerTable[opcode]
+	if !ok {
+		s.logger.Warn("No handler for opcode", zap.Stringer("opcode", opcode))
+		return
+	}
+	handler(s, mhfPkt)
 	// If there is more data on the stream that the .Parse method didn't read, then read another packet off it.
 	remainingData := bf.DataFromCurrent()
 	if len(remainingData) >= 2 {
@@ -242,22 +287,18 @@ func (s *Session) handlePacketGroup(pktGroup []byte) {
 	}
 }
 
+var ignoredOpcodes = map[network.PacketID]struct{}{
+	network.MSG_SYS_END:              {},
+	network.MSG_SYS_PING:             {},
+	network.MSG_SYS_NOP:              {},
+	network.MSG_SYS_TIME:             {},
+	network.MSG_SYS_EXTEND_THRESHOLD: {},
+	network.MSG_SYS_POSITION_OBJECT:  {},
+}
+
 func ignored(opcode network.PacketID) bool {
-	ignoreList := []network.PacketID{
-		network.MSG_SYS_END,
-		network.MSG_SYS_PING,
-		network.MSG_SYS_NOP,
-		network.MSG_SYS_TIME,
-		network.MSG_SYS_EXTEND_THRESHOLD,
-		network.MSG_SYS_POSITION_OBJECT,
-		network.MSG_MHF_SAVEDATA,
-	}
-	set := make(map[network.PacketID]struct{}, len(ignoreList))
-	for _, s := range ignoreList {
-		set[s] = struct{}{}
-	}
-	_, r := set[opcode]
-	return r
+	_, ok := ignoredOpcodes[opcode]
+	return ok
 }
 
 func (s *Session) logMessage(opcode uint16, data []byte, sender string, recipient string) {
@@ -275,62 +316,49 @@ func (s *Session) logMessage(opcode uint16, data []byte, sender string, recipien
 	if len(data) >= 6 {
 		ackHandle = binary.BigEndian.Uint32(data[2:6])
 	}
-	if t, ok := s.ackStart[ackHandle]; ok {
-		fmt.Printf("[%s] -> [%s] (%fs)\n", sender, recipient, float64(time.Now().UnixNano()-t.UnixNano())/1000000000)
-	} else {
-		fmt.Printf("[%s] -> [%s]\n", sender, recipient)
+	fields := []zap.Field{
+		zap.String("sender", sender),
+		zap.String("recipient", recipient),
+		zap.Uint16("opcode_dec", opcode),
+		zap.String("opcode_hex", fmt.Sprintf("0x%04X", opcode)),
+		zap.Stringer("opcode_name", opcodePID),
+		zap.Int("data_bytes", len(data)),
 	}
-	fmt.Printf("Opcode: (Dec: %d Hex: 0x%04X Name: %s) \n", opcode, opcode, opcodePID)
+	if t, ok := s.ackStart[ackHandle]; ok {
+		fields = append(fields, zap.Duration("ack_latency", time.Since(t)))
+	}
 	if s.server.erupeConfig.DebugOptions.LogMessageData {
 		if len(data) <= s.server.erupeConfig.DebugOptions.MaxHexdumpLength {
-			fmt.Printf("Data [%d bytes]:\n%s\n", len(data), hex.Dump(data))
-		} else {
-			fmt.Printf("Data [%d bytes]: (Too long!)\n\n", len(data))
-		}
-	} else {
-		fmt.Printf("\n")
-	}
-}
-
-func (s *Session) SetObjectID() {
-	for i := uint16(1); i < 127; i++ {
-		exists := false
-		for _, j := range s.server.objectIDs {
-			if i == j {
-				exists = true
-				break
-			}
-		}
-		if !exists {
-			s.server.objectIDs[s] = i
-			return
+			fields = append(fields, zap.String("data", hex.Dump(data)))
 		}
 	}
-	s.server.objectIDs[s] = 0
+	s.logger.Debug("Packet", fields...)
 }
 
-func (s *Session) NextObjectID() uint32 {
-	bf := byteframe.NewByteFrame()
-	bf.WriteUint16(s.server.objectIDs[s])
+func (s *Session) getObjectId() uint32 {
 	s.objectIndex++
-	bf.WriteUint16(s.objectIndex)
-	bf.Seek(0, 0)
-	return bf.ReadUint32()
+	return uint32(s.objectID)<<16 | uint32(s.objectIndex)
 }
 
+// Semaphore ID base values
+const (
+	semaphoreBaseDefault = uint32(0x000F0000)
+	semaphoreBaseAlt     = uint32(0x000E0000)
+)
+
+// GetSemaphoreID returns the semaphore ID held by the session, varying by semaphore mode.
 func (s *Session) GetSemaphoreID() uint32 {
 	if s.semaphoreMode {
-		return 0x000E0000 + uint32(s.semaphoreID[1])
+		return semaphoreBaseAlt + uint32(s.semaphoreID[1])
 	} else {
-		return 0x000F0000 + uint32(s.semaphoreID[0])
+		return semaphoreBaseDefault + uint32(s.semaphoreID[0])
 	}
 }
 
 func (s *Session) isOp() bool {
-	var op bool
-	err := s.server.db.QueryRow(`SELECT op FROM users u WHERE u.id=(SELECT c.user_id FROM characters c WHERE c.id=$1)`, s.charID).Scan(&op)
-	if err == nil && op {
-		return true
+	op, err := s.server.userRepo.IsOp(s.userID)
+	if err != nil {
+		return false
 	}
-	return false
+	return op
 }

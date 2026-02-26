@@ -2,10 +2,10 @@ package signserver
 
 import (
 	"erupe-ce/common/byteframe"
+	"erupe-ce/common/gametime"
 	ps "erupe-ce/common/pascalstring"
 	"erupe-ce/common/stringsupport"
-	_config "erupe-ce/config"
-	"erupe-ce/server/channelserver"
+	cfg "erupe-ce/config"
 	"fmt"
 	"strings"
 	"time"
@@ -50,7 +50,7 @@ func (s *Session) makeSignResponse(uid uint32) []byte {
 	bf.WriteUint8(uint8(len(chars)))
 	bf.WriteUint32(tokenID)
 	bf.WriteBytes([]byte(sessToken))
-	bf.WriteUint32(uint32(channelserver.TimeAdjusted().Unix()))
+	bf.WriteUint32(uint32(gametime.Adjusted().Unix()))
 	if s.client == PS3 {
 		ps.Uint8(bf, fmt.Sprintf("%s/ps3", s.server.erupeConfig.PatchServerManifest), false)
 		ps.Uint8(bf, fmt.Sprintf("%s/ps3", s.server.erupeConfig.PatchServerFile), false)
@@ -83,7 +83,7 @@ func (s *Session) makeSignResponse(uid uint32) []byte {
 		bf.WriteBool(true)                                                       // Use uint16 GR, no reason not to
 		bf.WriteBytes(stringsupport.PaddedString(char.Name, 16, true))           // Character name
 		bf.WriteBytes(stringsupport.PaddedString(char.UnkDescString, 32, false)) // unk str
-		if s.server.erupeConfig.RealClientMode >= _config.G7 {
+		if s.server.erupeConfig.RealClientMode >= cfg.G7 {
 			bf.WriteUint16(char.GR)
 			bf.WriteUint8(0) // Unk
 			bf.WriteUint8(0) // Unk
@@ -333,15 +333,24 @@ func (s *Session) makeSignResponse(uid uint32) []byte {
 	bf.WriteBytes(filters.Data())
 
 	if s.client == VITA || s.client == PS3 || s.client == PS4 {
-		var psnUser string
-		s.server.db.QueryRow("SELECT psn_id FROM users WHERE id = $1", uid).Scan(&psnUser)
+		psnUser, err := s.server.userRepo.GetPSNIDForUser(uid)
+		if err != nil {
+			s.logger.Warn("Failed to get PSN ID for user", zap.Uint32("uid", uid), zap.Error(err))
+		}
 		bf.WriteBytes(stringsupport.PaddedString(psnUser, 20, true))
 	}
 
-	bf.WriteUint16(s.server.erupeConfig.DebugOptions.CapLink.Values[0])
-	if s.server.erupeConfig.DebugOptions.CapLink.Values[0] == 51728 {
-		bf.WriteUint16(s.server.erupeConfig.DebugOptions.CapLink.Values[1])
-		if s.server.erupeConfig.DebugOptions.CapLink.Values[1] == 20000 || s.server.erupeConfig.DebugOptions.CapLink.Values[1] == 20002 {
+	// CapLink.Values requires at least 5 elements to avoid index out of range panics
+	// Provide safe defaults if array is too small
+	capLinkValues := s.server.erupeConfig.DebugOptions.CapLink.Values
+	if len(capLinkValues) < 5 {
+		capLinkValues = []uint16{0, 0, 0, 0, 0}
+	}
+
+	bf.WriteUint16(capLinkValues[0])
+	if capLinkValues[0] == 51728 {
+		bf.WriteUint16(capLinkValues[1])
+		if capLinkValues[1] == 20000 || capLinkValues[1] == 20002 {
 			ps.Uint16(bf, s.server.erupeConfig.DebugOptions.CapLink.Key, false)
 		}
 	}
@@ -356,10 +365,10 @@ func (s *Session) makeSignResponse(uid uint32) []byte {
 		bf.WriteUint32(caStruct[i].Unk1)
 		ps.Uint8(bf, caStruct[i].Unk2, false)
 	}
-	bf.WriteUint16(s.server.erupeConfig.DebugOptions.CapLink.Values[2])
-	bf.WriteUint16(s.server.erupeConfig.DebugOptions.CapLink.Values[3])
-	bf.WriteUint16(s.server.erupeConfig.DebugOptions.CapLink.Values[4])
-	if s.server.erupeConfig.DebugOptions.CapLink.Values[2] == 51729 && s.server.erupeConfig.DebugOptions.CapLink.Values[3] == 1 && s.server.erupeConfig.DebugOptions.CapLink.Values[4] == 20000 {
+	bf.WriteUint16(capLinkValues[2])
+	bf.WriteUint16(capLinkValues[3])
+	bf.WriteUint16(capLinkValues[4])
+	if capLinkValues[2] == 51729 && capLinkValues[3] == 1 && capLinkValues[4] == 20000 {
 		ps.Uint16(bf, fmt.Sprintf(`%s:%d`, s.server.erupeConfig.DebugOptions.CapLink.Host, s.server.erupeConfig.DebugOptions.CapLink.Port), false)
 	}
 
@@ -378,11 +387,11 @@ func (s *Session) makeSignResponse(uid uint32) []byte {
 	}
 
 	// We can just use the start timestamp as the event ID
-	bf.WriteUint32(uint32(channelserver.TimeWeekStart().Unix()))
+	bf.WriteUint32(uint32(gametime.WeekStart().Unix()))
 	// Start time
-	bf.WriteUint32(uint32(channelserver.TimeWeekNext().Add(-time.Duration(s.server.erupeConfig.GameplayOptions.MezFesDuration) * time.Second).Unix()))
+	bf.WriteUint32(uint32(gametime.WeekNext().Add(-time.Duration(s.server.erupeConfig.GameplayOptions.MezFesDuration) * time.Second).Unix()))
 	// End time
-	bf.WriteUint32(uint32(channelserver.TimeWeekNext().Unix()))
+	bf.WriteUint32(uint32(gametime.WeekNext().Unix()))
 	bf.WriteUint8(uint8(len(tickets)))
 	for i := range tickets {
 		bf.WriteUint32(tickets[i])

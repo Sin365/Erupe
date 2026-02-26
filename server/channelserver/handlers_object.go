@@ -1,10 +1,10 @@
 package channelserver
 
 import (
-	"fmt"
-
 	"erupe-ce/common/byteframe"
 	"erupe-ce/network/mhfpacket"
+
+	"go.uber.org/zap"
 )
 
 func handleMsgSysCreateObject(s *Session, p mhfpacket.MHFPacket) {
@@ -12,7 +12,7 @@ func handleMsgSysCreateObject(s *Session, p mhfpacket.MHFPacket) {
 
 	s.stage.Lock()
 	newObj := &Object{
-		id:          s.NextObjectID(),
+		id:          s.getObjectId(),
 		ownerCharID: s.charID,
 		x:           pkt.X,
 		y:           pkt.Y,
@@ -34,7 +34,7 @@ func handleMsgSysCreateObject(s *Session, p mhfpacket.MHFPacket) {
 		OwnerCharID: newObj.ownerCharID,
 	}
 
-	s.logger.Info(fmt.Sprintf("Broadcasting new object: %s (%d)", s.Name, newObj.id))
+	s.logger.Info("Broadcasting new object", zap.String("name", s.Name), zap.Uint32("objectID", newObj.id))
 	s.stage.BroadcastMHF(dupObjUpdate, s)
 }
 
@@ -43,7 +43,13 @@ func handleMsgSysDeleteObject(s *Session, p mhfpacket.MHFPacket) {}
 func handleMsgSysPositionObject(s *Session, p mhfpacket.MHFPacket) {
 	pkt := p.(*mhfpacket.MsgSysPositionObject)
 	if s.server.erupeConfig.DebugOptions.LogInboundMessages {
-		fmt.Printf("[%s] with objectID [%d] move to (%f,%f,%f)\n\n", s.Name, pkt.ObjID, pkt.X, pkt.Y, pkt.Z)
+		s.logger.Debug("Object position update",
+			zap.String("name", s.Name),
+			zap.Uint32("objectID", pkt.ObjID),
+			zap.Float32("x", pkt.X),
+			zap.Float32("y", pkt.Y),
+			zap.Float32("z", pkt.Z),
+		)
 	}
 	s.stage.Lock()
 	object, ok := s.stage.objects[s.charID]
@@ -66,9 +72,7 @@ func handleMsgSysSetObjectBinary(s *Session, p mhfpacket.MHFPacket) {
 	/* This causes issues with PS3 as this actually sends with endiness!
 	for _, session := range s.server.sessions {
 		if session.charID == s.charID {
-			s.server.userBinaryPartsLock.Lock()
-			s.server.userBinaryParts[userBinaryPartID{charID: s.charID, index: 3}] = pkt.RawDataPayload
-			s.server.userBinaryPartsLock.Unlock()
+			s.server.userBinary.Set(s.charID, 3, pkt.RawDataPayload)
 			msg := &mhfpacket.MsgSysNotifyUserBinary{
 				CharID:     s.charID,
 				BinaryType: 3,

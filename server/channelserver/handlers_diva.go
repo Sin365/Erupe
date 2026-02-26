@@ -3,15 +3,26 @@ package channelserver
 import (
 	"encoding/hex"
 	"erupe-ce/common/stringsupport"
-	_config "erupe-ce/config"
+	cfg "erupe-ce/config"
 	"time"
 
 	"erupe-ce/common/byteframe"
 	"erupe-ce/network/mhfpacket"
+	"go.uber.org/zap"
+)
+
+// Diva Defense event duration constants (all values in seconds)
+const (
+	divaPhaseDuration = 601200      // 6d 23h = first song phase
+	divaInterlude     = 3900        // 65 min = gap between phases
+	divaWeekDuration  = secsPerWeek // 7 days = subsequent phase length
+	divaTotalLifespan = 2977200     // ~34.5 days = full event window
 )
 
 func cleanupDiva(s *Session) {
-	s.server.db.Exec("DELETE FROM events WHERE event_type='diva'")
+	if err := s.server.divaRepo.DeleteEvents(); err != nil {
+		s.logger.Error("Failed to delete diva events", zap.Error(err))
+	}
 }
 
 func generateDivaTimestamps(s *Session, start uint32, debug bool) []uint32 {
@@ -22,40 +33,42 @@ func generateDivaTimestamps(s *Session, start uint32, debug bool) []uint32 {
 		switch start {
 		case 1:
 			timestamps[0] = midnight
-			timestamps[1] = timestamps[0] + 601200
-			timestamps[2] = timestamps[1] + 3900
-			timestamps[3] = timestamps[1] + 604800
-			timestamps[4] = timestamps[3] + 3900
-			timestamps[5] = timestamps[3] + 604800
+			timestamps[1] = timestamps[0] + divaPhaseDuration
+			timestamps[2] = timestamps[1] + divaInterlude
+			timestamps[3] = timestamps[1] + divaWeekDuration
+			timestamps[4] = timestamps[3] + divaInterlude
+			timestamps[5] = timestamps[3] + divaWeekDuration
 		case 2:
-			timestamps[0] = midnight - 605100
-			timestamps[1] = midnight - 3900
+			timestamps[0] = midnight - (divaPhaseDuration + divaInterlude)
+			timestamps[1] = midnight - divaInterlude
 			timestamps[2] = midnight
-			timestamps[3] = timestamps[1] + 604800
-			timestamps[4] = timestamps[3] + 3900
-			timestamps[5] = timestamps[3] + 604800
+			timestamps[3] = timestamps[1] + divaWeekDuration
+			timestamps[4] = timestamps[3] + divaInterlude
+			timestamps[5] = timestamps[3] + divaWeekDuration
 		case 3:
-			timestamps[0] = midnight - 1213800
-			timestamps[1] = midnight - 608700
-			timestamps[2] = midnight - 604800
-			timestamps[3] = midnight - 3900
+			timestamps[0] = midnight - (divaPhaseDuration + divaInterlude + divaWeekDuration + divaInterlude)
+			timestamps[1] = midnight - (divaWeekDuration + divaInterlude)
+			timestamps[2] = midnight - divaWeekDuration
+			timestamps[3] = midnight - divaInterlude
 			timestamps[4] = midnight
-			timestamps[5] = timestamps[3] + 604800
+			timestamps[5] = timestamps[3] + divaWeekDuration
 		}
 		return timestamps
 	}
-	if start == 0 || TimeAdjusted().Unix() > int64(start)+2977200 {
+	if start == 0 || TimeAdjusted().Unix() > int64(start)+divaTotalLifespan {
 		cleanupDiva(s)
 		// Generate a new diva defense, starting midnight tomorrow
 		start = uint32(midnight.Add(24 * time.Hour).Unix())
-		s.server.db.Exec("INSERT INTO events (event_type, start_time) VALUES ('diva', to_timestamp($1)::timestamp without time zone)", start)
+		if err := s.server.divaRepo.InsertEvent(start); err != nil {
+			s.logger.Error("Failed to insert diva event", zap.Error(err))
+		}
 	}
 	timestamps[0] = start
-	timestamps[1] = timestamps[0] + 601200
-	timestamps[2] = timestamps[1] + 3900
-	timestamps[3] = timestamps[1] + 604800
-	timestamps[4] = timestamps[3] + 3900
-	timestamps[5] = timestamps[3] + 604800
+	timestamps[1] = timestamps[0] + divaPhaseDuration
+	timestamps[2] = timestamps[1] + divaInterlude
+	timestamps[3] = timestamps[1] + divaWeekDuration
+	timestamps[4] = timestamps[3] + divaInterlude
+	timestamps[5] = timestamps[3] + divaWeekDuration
 	return timestamps
 }
 
@@ -63,16 +76,21 @@ func handleMsgMhfGetUdSchedule(s *Session, p mhfpacket.MHFPacket) {
 	pkt := p.(*mhfpacket.MsgMhfGetUdSchedule)
 	bf := byteframe.NewByteFrame()
 
-	id, start := uint32(0xCAFEBEEF), uint32(0)
-	rows, _ := s.server.db.Queryx("SELECT id, (EXTRACT(epoch FROM start_time)::int) as start_time FROM events WHERE event_type='diva'")
-	for rows.Next() {
-		rows.Scan(&id, &start)
+	const divaIDSentinel = uint32(0xCAFEBEEF)
+	id, start := divaIDSentinel, uint32(0)
+	events, err := s.server.divaRepo.GetEvents()
+	if err != nil {
+		s.logger.Error("Failed to query diva schedule", zap.Error(err))
+	} else if len(events) > 0 {
+		last := events[len(events)-1]
+		id = last.ID
+		start = last.StartTime
 	}
 
 	var timestamps []uint32
 	if s.server.erupeConfig.DebugOptions.DivaOverride >= 0 {
 		if s.server.erupeConfig.DebugOptions.DivaOverride == 0 {
-			if s.server.erupeConfig.RealClientMode >= _config.Z2 {
+			if s.server.erupeConfig.RealClientMode >= cfg.Z2 {
 				doAckBufSucceed(s, pkt.AckHandle, make([]byte, 36))
 			} else {
 				doAckBufSucceed(s, pkt.AckHandle, make([]byte, 32))
@@ -84,7 +102,7 @@ func handleMsgMhfGetUdSchedule(s *Session, p mhfpacket.MHFPacket) {
 		timestamps = generateDivaTimestamps(s, start, false)
 	}
 
-	if s.server.erupeConfig.RealClientMode >= _config.Z2 {
+	if s.server.erupeConfig.RealClientMode >= cfg.Z2 {
 		bf.WriteUint32(id)
 	}
 	for i := range timestamps {

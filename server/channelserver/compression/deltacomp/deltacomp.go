@@ -2,8 +2,9 @@ package deltacomp
 
 import (
 	"bytes"
-	"fmt"
 	"io"
+
+	"go.uber.org/zap"
 )
 
 func checkReadUint8(r *bytes.Reader) (uint8, error) {
@@ -77,7 +78,7 @@ func ApplyDataDiff(diff []byte, baseData []byte) []byte {
 
 		// Grow slice if it's required
 		if len(baseCopy) < dataOffset {
-			fmt.Printf("Slice smaller than data offset, growing slice...")
+			zap.L().Warn("Slice smaller than data offset, growing slice")
 			baseCopy = append(baseCopy, make([]byte, (dataOffset+differentCount)-len(baseData))...)
 		} else {
 			length := len(baseCopy[dataOffset:])
@@ -91,7 +92,8 @@ func ApplyDataDiff(diff []byte, baseData []byte) []byte {
 		for i := 0; i < differentCount; i++ {
 			b, err := checkReadUint8(patch)
 			if err != nil {
-				panic("Invalid or misunderstood patch format!")
+				zap.L().Error("Invalid or misunderstood patch format", zap.Int("dataOffset", dataOffset))
+				return baseCopy
 			}
 
 			baseCopy[dataOffset+i] = b

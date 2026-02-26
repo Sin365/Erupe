@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	_config "erupe-ce/config"
+	cfg "erupe-ce/config"
 	"fmt"
 	"net/http"
 	"os"
@@ -15,18 +15,22 @@ import (
 	"go.uber.org/zap"
 )
 
+// Config holds the dependencies required to initialize an APIServer.
 type Config struct {
 	Logger      *zap.Logger
 	DB          *sqlx.DB
-	ErupeConfig *_config.Config
+	ErupeConfig *cfg.Config
 }
 
 // APIServer is Erupes Standard API interface
 type APIServer struct {
 	sync.Mutex
 	logger         *zap.Logger
-	erupeConfig    *_config.Config
 	db             *sqlx.DB
+	erupeConfig    *cfg.Config
+	userRepo       APIUserRepo
+	charRepo       APICharacterRepo
+	sessionRepo    APISessionRepo
 	httpServer     *http.Server
 	isShuttingDown bool
 }
@@ -35,9 +39,14 @@ type APIServer struct {
 func NewAPIServer(config *Config) *APIServer {
 	s := &APIServer{
 		logger:      config.Logger,
-		erupeConfig: config.ErupeConfig,
 		db:          config.DB,
+		erupeConfig: config.ErupeConfig,
 		httpServer:  &http.Server{},
+	}
+	if config.DB != nil {
+		s.userRepo = NewAPIUserRepository(config.DB)
+		s.charRepo = NewAPICharacterRepository(config.DB)
+		s.sessionRepo = NewAPISessionRepository(config.DB)
 	}
 	return s
 }
@@ -54,6 +63,9 @@ func (s *APIServer) Start() error {
 	r.HandleFunc("/character/export", s.ExportSave)
 	r.HandleFunc("/api/ss/bbs/upload.php", s.ScreenShot)
 	r.HandleFunc("/api/ss/bbs/{id}", s.ScreenShotGet)
+	r.HandleFunc("/", s.LandingPage)
+	r.HandleFunc("/health", s.Health)
+	r.HandleFunc("/version", s.Version)
 	handler := handlers.CORS(handlers.AllowedHeaders([]string{"Content-Type"}))(r)
 	s.httpServer.Handler = handlers.LoggingHandler(os.Stdout, handler)
 	s.httpServer.Addr = fmt.Sprintf(":%d", s.erupeConfig.API.Port)

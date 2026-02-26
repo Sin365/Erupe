@@ -4,77 +4,17 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"golang.org/x/crypto/bcrypt"
-	"sort"
 	"strings"
 	"unicode"
 )
-
-type Player struct {
-	CharName string
-	QuestID  int
-}
-
-func getPlayerSlice(s *Server) []Player {
-	var p []Player
-	var questIndex int
-
-	for _, channel := range s.Channels {
-		for _, stage := range channel.stages {
-			if len(stage.clients) == 0 {
-				continue
-			}
-			questID := 0
-			if stage.isQuest() {
-				questIndex++
-				questID = questIndex
-			}
-			for client := range stage.clients {
-				p = append(p, Player{
-					CharName: client.Name,
-					QuestID:  questID,
-				})
-			}
-		}
-	}
-	return p
-}
-
-func getCharacterList(s *Server) string {
-	questEmojis := []string{
-		":person_in_lotus_position:",
-		":white_circle:",
-		":red_circle:",
-		":blue_circle:",
-		":brown_circle:",
-		":green_circle:",
-		":purple_circle:",
-		":yellow_circle:",
-		":orange_circle:",
-		":black_circle:",
-	}
-
-	playerSlice := getPlayerSlice(s)
-
-	sort.SliceStable(playerSlice, func(i, j int) bool {
-		return playerSlice[i].QuestID < playerSlice[j].QuestID
-	})
-
-	message := fmt.Sprintf("===== Online: %d =====\n", len(playerSlice))
-	for _, player := range playerSlice {
-		message += fmt.Sprintf("%s %s", questEmojis[player.QuestID], player.CharName)
-	}
-
-	return message
-}
 
 // onInteraction handles slash commands
 func (s *Server) onInteraction(ds *discordgo.Session, i *discordgo.InteractionCreate) {
 	switch i.Interaction.ApplicationCommandData().Name {
 	case "link":
-		var temp string
-		err := s.db.QueryRow(`UPDATE users SET discord_id = $1 WHERE discord_token = $2 RETURNING discord_id`, i.Member.User.ID, i.ApplicationCommandData().Options[0].StringValue()).Scan(&temp)
+		_, err := s.userRepo.LinkDiscord(i.Member.User.ID, i.ApplicationCommandData().Options[0].StringValue())
 		if err == nil {
-			ds.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_ = ds.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Your Erupe account was linked successfully.",
@@ -82,7 +22,7 @@ func (s *Server) onInteraction(ds *discordgo.Session, i *discordgo.InteractionCr
 				},
 			})
 		} else {
-			ds.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_ = ds.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Failed to link Erupe account.",
@@ -91,10 +31,20 @@ func (s *Server) onInteraction(ds *discordgo.Session, i *discordgo.InteractionCr
 			})
 		}
 	case "password":
-		password, _ := bcrypt.GenerateFromPassword([]byte(i.ApplicationCommandData().Options[0].StringValue()), 10)
-		_, err := s.db.Exec(`UPDATE users SET password = $1 WHERE discord_id = $2`, password, i.Member.User.ID)
+		password, err := bcrypt.GenerateFromPassword([]byte(i.ApplicationCommandData().Options[0].StringValue()), 10)
+		if err != nil {
+			_ = ds.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Failed to hash password.",
+					Flags:   discordgo.MessageFlagsEphemeral,
+				},
+			})
+			return
+		}
+		err = s.userRepo.SetPasswordByDiscordID(i.Member.User.ID, password)
 		if err == nil {
-			ds.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_ = ds.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Your Erupe account password has been updated.",
@@ -102,7 +52,7 @@ func (s *Server) onInteraction(ds *discordgo.Session, i *discordgo.InteractionCr
 				},
 			})
 		} else {
-			ds.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+			_ = ds.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
 					Content: "Failed to update Erupe account password.",

@@ -4,11 +4,12 @@ import (
 	"erupe-ce/common/byteframe"
 	ps "erupe-ce/common/pascalstring"
 	"erupe-ce/common/stringsupport"
-	_config "erupe-ce/config"
+	cfg "erupe-ce/config"
 	"erupe-ce/network/mhfpacket"
 	"time"
 )
 
+// CampaignEvent represents a promotional campaign event.
 type CampaignEvent struct {
 	ID         uint32
 	Unk0       uint32
@@ -35,6 +36,7 @@ type CampaignEvent struct {
 	Categories []uint16
 }
 
+// CampaignCategory represents a category grouping for campaign events.
 type CampaignCategory struct {
 	ID          uint16
 	Type        uint8
@@ -42,6 +44,7 @@ type CampaignCategory struct {
 	Description string
 }
 
+// CampaignLink links a campaign event to its items/rewards.
 type CampaignLink struct {
 	CategoryID uint16
 	CampaignID uint32
@@ -68,7 +71,7 @@ func handleMsgMhfEnumerateCampaign(s *Session, p mhfpacket.MHFPacket) {
 		bf.WriteInt16(event.MaxHR)
 		bf.WriteInt16(event.MinSR)
 		bf.WriteInt16(event.MaxSR)
-		if _config.ErupeConfig.RealClientMode >= _config.G3 {
+		if s.server.erupeConfig.RealClientMode >= cfg.G3 {
 			bf.WriteInt16(event.MinGR)
 			bf.WriteInt16(event.MaxGR)
 		}

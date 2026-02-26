@@ -12,9 +12,7 @@ import (
 func removeSessionFromSemaphore(s *Session) {
 	s.server.semaphoreLock.Lock()
 	for _, semaphore := range s.server.semaphore {
-		if _, exists := semaphore.clients[s]; exists {
-			delete(semaphore.clients, s)
-		}
+		delete(semaphore.clients, s)
 	}
 	s.server.semaphoreLock.Unlock()
 }
@@ -81,9 +79,9 @@ func handleMsgSysCreateAcquireSemaphore(s *Session, p mhfpacket.MHFPacket) {
 			suffix, _ := strconv.Atoi(pkt.SemaphoreID[len(pkt.SemaphoreID)-1:])
 			s.server.semaphore[SemaphoreID] = &Semaphore{
 				name:       pkt.SemaphoreID,
-				id:         uint32((suffix + 1) * 0x10000),
+				id:         uint32((suffix + 1) * raviSemaphoreStride),
 				clients:    make(map[*Session]uint32),
-				maxPlayers: 127,
+				maxPlayers: raviSemaphoreMax,
 			}
 		} else {
 			s.server.semaphore[SemaphoreID] = NewSemaphore(s, SemaphoreID, 1)

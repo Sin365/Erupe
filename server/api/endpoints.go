@@ -1,12 +1,13 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
-	_config "erupe-ce/config"
-	"erupe-ce/server/channelserver"
+	"erupe-ce/common/gametime"
+	cfg "erupe-ce/config"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -24,23 +25,30 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Notification type constants for launcher messages.
 const (
+	// NotificationDefault represents a standard notification.
 	NotificationDefault = iota
+	// NotificationNew represents a new/unread notification.
 	NotificationNew
 )
 
+// LauncherResponse is the JSON payload returned by the /launcher endpoint,
+// containing banners, messages, and links for the game launcher UI.
 type LauncherResponse struct {
-	Banners  []_config.APISignBanner  `json:"banners"`
-	Messages []_config.APISignMessage `json:"messages"`
-	Links    []_config.APISignLink    `json:"links"`
+	Banners  []cfg.APISignBanner  `json:"banners"`
+	Messages []cfg.APISignMessage `json:"messages"`
+	Links    []cfg.APISignLink    `json:"links"`
 }
 
+// User represents an authenticated user's session credentials and permissions.
 type User struct {
 	TokenID uint32 `json:"tokenId"`
 	Token   string `json:"token"`
 	Rights  uint32 `json:"rights"`
 }
 
+// Character represents a player character's summary data as returned by the API.
 type Character struct {
 	ID        uint32 `json:"id"`
 	Name      string `json:"name"`
@@ -51,6 +59,7 @@ type Character struct {
 	LastLogin int32  `json:"lastLogin" db:"last_login"`
 }
 
+// MezFes represents the current Mezeporta Festival event schedule and ticket configuration.
 type MezFes struct {
 	ID           uint32   `json:"id"`
 	Start        uint32   `json:"start"`
@@ -60,6 +69,8 @@ type MezFes struct {
 	Stalls       []uint32 `json:"stalls"`
 }
 
+// AuthData is the JSON payload returned after successful login or registration,
+// containing session info, character list, event data, and server notices.
 type AuthData struct {
 	CurrentTS     uint32      `json:"currentTs"`
 	ExpiryTS      uint32      `json:"expiryTs"`
@@ -71,13 +82,14 @@ type AuthData struct {
 	PatchServer   string      `json:"patchServer"`
 }
 
+// ExportData wraps a character's full database row for save export.
 type ExportData struct {
 	Character map[string]interface{} `json:"character"`
 }
 
 func (s *APIServer) newAuthData(userID uint32, userRights uint32, userTokenID uint32, userToken string, characters []Character) AuthData {
 	resp := AuthData{
-		CurrentTS:     uint32(channelserver.TimeAdjusted().Unix()),
+		CurrentTS:     uint32(gametime.Adjusted().Unix()),
 		ExpiryTS:      uint32(s.getReturnExpiry(userID).Unix()),
 		EntranceCount: 1,
 		User: User{
@@ -99,9 +111,9 @@ func (s *APIServer) newAuthData(userID uint32, userRights uint32, userTokenID ui
 		stalls[4] = 2
 	}
 	resp.MezFes = &MezFes{
-		ID:           uint32(channelserver.TimeWeekStart().Unix()),
-		Start:        uint32(channelserver.TimeWeekStart().Add(-time.Duration(s.erupeConfig.GameplayOptions.MezFesDuration) * time.Second).Unix()),
-		End:          uint32(channelserver.TimeWeekNext().Unix()),
+		ID:           uint32(gametime.WeekStart().Unix()),
+		Start:        uint32(gametime.WeekStart().Add(-time.Duration(s.erupeConfig.GameplayOptions.MezFesDuration) * time.Second).Unix()),
+		End:          uint32(gametime.WeekNext().Unix()),
 		SoloTickets:  s.erupeConfig.GameplayOptions.MezFesSoloTickets,
 		GroupTickets: s.erupeConfig.GameplayOptions.MezFesGroupTickets,
 		Stalls:       stalls,
@@ -112,15 +124,34 @@ func (s *APIServer) newAuthData(userID uint32, userRights uint32, userTokenID ui
 	return resp
 }
 
+// VersionResponse is the JSON payload returned by the /version endpoint.
+type VersionResponse struct {
+	ClientMode string `json:"clientMode"`
+	Name       string `json:"name"`
+}
+
+// Version handles GET /version and returns the server name and client mode.
+func (s *APIServer) Version(w http.ResponseWriter, r *http.Request) {
+	resp := VersionResponse{
+		ClientMode: s.erupeConfig.ClientMode,
+		Name:       "Erupe-CE",
+	}
+	w.Header().Add("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+// Launcher handles GET /launcher and returns banners, messages, and links for the launcher UI.
 func (s *APIServer) Launcher(w http.ResponseWriter, r *http.Request) {
 	var respData LauncherResponse
 	respData.Banners = s.erupeConfig.API.Banners
 	respData.Messages = s.erupeConfig.API.Messages
 	respData.Links = s.erupeConfig.API.Links
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(respData)
+	_ = json.NewEncoder(w).Encode(respData)
 }
 
+// Login handles POST /login, authenticating a user by username and password
+// and returning a session token with character data.
 func (s *APIServer) Login(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var reqData struct {
@@ -132,15 +163,10 @@ func (s *APIServer) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	var (
-		userID     uint32
-		userRights uint32
-		password   string
-	)
-	err := s.db.QueryRow("SELECT id, password, rights FROM users WHERE username = $1", reqData.Username).Scan(&userID, &password, &userRights)
+	userID, password, userRights, err := s.userRepo.GetCredentials(ctx, reqData.Username)
 	if err == sql.ErrNoRows {
 		w.WriteHeader(400)
-		w.Write([]byte("username-error"))
+		_, _ = w.Write([]byte("username-error"))
 		return
 	} else if err != nil {
 		s.logger.Warn("SQL query error", zap.Error(err))
@@ -149,7 +175,7 @@ func (s *APIServer) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	if bcrypt.CompareHashAndPassword([]byte(password), []byte(reqData.Password)) != nil {
 		w.WriteHeader(400)
-		w.Write([]byte("password-error"))
+		_, _ = w.Write([]byte("password-error"))
 		return
 	}
 
@@ -170,9 +196,11 @@ func (s *APIServer) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	respData := s.newAuthData(userID, userRights, userTokenID, userToken, characters)
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(respData)
+	_ = json.NewEncoder(w).Encode(respData)
 }
 
+// Register handles POST /register, creating a new user account and returning
+// a session token.
 func (s *APIServer) Register(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var reqData struct {
@@ -194,7 +222,7 @@ func (s *APIServer) Register(w http.ResponseWriter, r *http.Request) {
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) && pqErr.Constraint == "users_username_key" {
 			w.WriteHeader(400)
-			w.Write([]byte("username-exists-error"))
+			_, _ = w.Write([]byte("username-exists-error"))
 			return
 		}
 		s.logger.Error("Error checking user", zap.Error(err), zap.String("username", reqData.Username))
@@ -210,9 +238,11 @@ func (s *APIServer) Register(w http.ResponseWriter, r *http.Request) {
 	}
 	respData := s.newAuthData(userID, userRights, userTokenID, userToken, []Character{})
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(respData)
+	_ = json.NewEncoder(w).Encode(respData)
 }
 
+// CreateCharacter handles POST /character/create, creating a new character
+// slot for the authenticated user.
 func (s *APIServer) CreateCharacter(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var reqData struct {
@@ -239,9 +269,11 @@ func (s *APIServer) CreateCharacter(w http.ResponseWriter, r *http.Request) {
 		character.HR = 7
 	}
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(character)
+	_ = json.NewEncoder(w).Encode(character)
 }
 
+// DeleteCharacter handles POST /character/delete, soft-deleting an existing
+// character or removing an unfinished one.
 func (s *APIServer) DeleteCharacter(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var reqData struct {
@@ -264,9 +296,11 @@ func (s *APIServer) DeleteCharacter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(struct{}{})
+	_ = json.NewEncoder(w).Encode(struct{}{})
 }
 
+// ExportSave handles POST /character/export, returning the full character
+// database row as JSON for backup purposes.
 func (s *APIServer) ExportSave(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var reqData struct {
@@ -293,8 +327,11 @@ func (s *APIServer) ExportSave(w http.ResponseWriter, r *http.Request) {
 		Character: character,
 	}
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(save)
+	_ = json.NewEncoder(w).Encode(save)
 }
+
+// ScreenShotGet handles GET /api/ss/bbs/{id}, serving a previously uploaded
+// screenshot image by its token ID.
 func (s *APIServer) ScreenShotGet(w http.ResponseWriter, r *http.Request) {
 	// Get the 'id' parameter from the URL
 	token := mux.Vars(r)["id"]
@@ -307,19 +344,19 @@ func (s *APIServer) ScreenShotGet(w http.ResponseWriter, r *http.Request) {
 	// Open the image file
 	safePath := s.erupeConfig.Screenshots.OutputDir
 	path := filepath.Join(safePath, fmt.Sprintf("%s.jpg", token))
-	result, err := verifyPath(path, safePath)
+	result, err := verifyPath(path, safePath, s.logger)
 
 	if err != nil {
-		fmt.Println("Error " + err.Error())
+		s.logger.Warn("Screenshot path verification failed", zap.Error(err))
 	} else {
-		fmt.Println("Canonical: " + result)
+		s.logger.Debug("Screenshot canonical path", zap.String("path", result))
 
 		file, err := os.Open(result)
 		if err != nil {
 			http.Error(w, "Image not found", http.StatusNotFound)
 			return
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		// Set content type header to image/jpeg
 		w.Header().Set("Content-Type", "image/jpeg")
 		// Copy the image content to the response writer
@@ -329,84 +366,108 @@ func (s *APIServer) ScreenShotGet(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+// ScreenShot handles POST /api/ss/bbs/upload.php, accepting a JPEG image
+// upload from the game client and saving it to the configured output directory.
 func (s *APIServer) ScreenShot(w http.ResponseWriter, r *http.Request) {
-	// Create a struct representing the XML result
 	type Result struct {
 		XMLName xml.Name `xml:"result"`
 		Code    string   `xml:"code"`
 	}
-	// Set the Content-Type header to specify that the response is in XML format
-	w.Header().Set("Content-Type", "text/xml")
-	result := Result{Code: "200"}
-	if !s.erupeConfig.Screenshots.Enabled {
-		result = Result{Code: "400"}
-	} else {
 
-		if r.Method != http.MethodPost {
-			result = Result{Code: "405"}
-		}
-		// Get File from Request
-		file, _, err := r.FormFile("img")
+	writeResult := func(code string) {
+		w.Header().Set("Content-Type", "text/xml")
+		xmlData, err := xml.Marshal(Result{Code: code})
 		if err != nil {
-			result = Result{Code: "400"}
+			http.Error(w, "Unable to marshal XML", http.StatusInternalServerError)
+			return
 		}
-		var tokenPattern = regexp.MustCompile(`[A-Za-z0-9]+`)
-		token := r.FormValue("token")
-		if !tokenPattern.MatchString(token) || token == "" {
-			result = Result{Code: "401"}
-
-		}
-
-		// Validate file
-		img, _, err := image.Decode(file)
-		if err != nil {
-			result = Result{Code: "400"}
-		}
-
-		safePath := s.erupeConfig.Screenshots.OutputDir
-
-		path := filepath.Join(safePath, fmt.Sprintf("%s.jpg", token))
-		verified, err := verifyPath(path, safePath)
-
-		if err != nil {
-			result = Result{Code: "500"}
-		} else {
-
-			_, err = os.Stat(safePath)
-			if err != nil {
-				if os.IsNotExist(err) {
-					err = os.MkdirAll(safePath, os.ModePerm)
-					if err != nil {
-						s.logger.Error("Error writing screenshot, could not create folder")
-						result = Result{Code: "500"}
-					}
-				} else {
-					s.logger.Error("Error writing screenshot")
-					result = Result{Code: "500"}
-				}
-			}
-			// Create or open the output file
-			outputFile, err := os.Create(verified)
-			if err != nil {
-				result = Result{Code: "500"}
-			}
-			defer outputFile.Close()
-
-			// Encode the image and write it to the file
-			err = jpeg.Encode(outputFile, img, &jpeg.Options{Quality: s.erupeConfig.Screenshots.UploadQuality})
-			if err != nil {
-				s.logger.Error("Error writing screenshot, could not write file", zap.Error(err))
-				result = Result{Code: "500"}
-			}
-		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(xmlData)
 	}
-	// Marshal the struct into XML
-	xmlData, err := xml.Marshal(result)
-	if err != nil {
-		http.Error(w, "Unable to marshal XML", http.StatusInternalServerError)
+
+	if !s.erupeConfig.Screenshots.Enabled {
+		writeResult("400")
 		return
 	}
-	// Write the XML response with a 200 status code
-	w.WriteHeader(http.StatusOK)
-	w.Write(xmlData)
+	if r.Method != http.MethodPost {
+		writeResult("405")
+		return
+	}
+
+	var tokenPattern = regexp.MustCompile(`^[A-Za-z0-9]+$`)
+	token := r.FormValue("token")
+	if !tokenPattern.MatchString(token) {
+		writeResult("401")
+		return
+	}
+
+	file, _, err := r.FormFile("img")
+	if err != nil {
+		writeResult("400")
+		return
+	}
+
+	img, _, err := image.Decode(file)
+	if err != nil {
+		writeResult("400")
+		return
+	}
+
+	safePath := s.erupeConfig.Screenshots.OutputDir
+	path := filepath.Join(safePath, fmt.Sprintf("%s.jpg", token))
+	verified, err := verifyPath(path, safePath, s.logger)
+	if err != nil {
+		writeResult("500")
+		return
+	}
+
+	if err := os.MkdirAll(safePath, os.ModePerm); err != nil {
+		s.logger.Error("Error writing screenshot, could not create folder", zap.Error(err))
+		writeResult("500")
+		return
+	}
+
+	outputFile, err := os.Create(verified)
+	if err != nil {
+		s.logger.Error("Error writing screenshot, could not create file", zap.Error(err))
+		writeResult("500")
+		return
+	}
+	defer func() { _ = outputFile.Close() }()
+
+	if err := jpeg.Encode(outputFile, img, &jpeg.Options{Quality: s.erupeConfig.Screenshots.UploadQuality}); err != nil {
+		s.logger.Error("Error writing screenshot, could not write file", zap.Error(err))
+		writeResult("500")
+		return
+	}
+
+	writeResult("200")
+}
+
+// Health handles GET /health, returning the server's health status.
+// It pings the database to verify connectivity.
+func (s *APIServer) Health(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if s.db == nil {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"status": "unhealthy",
+			"error":  "database not configured",
+		})
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+	if err := s.db.PingContext(ctx); err != nil {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_ = json.NewEncoder(w).Encode(map[string]string{
+			"status": "unhealthy",
+			"error":  err.Error(),
+		})
+		return
+	}
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"status": "ok",
+	})
 }
