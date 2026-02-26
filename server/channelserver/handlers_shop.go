@@ -79,7 +79,7 @@ func handleMsgMhfEnumerateShop(s *Session, p mhfpacket.MHFPacket) {
 	switch pkt.ShopType {
 	case 1: // Running gachas
 		// Fundamentally, gacha works completely differently, just hide it for now.
-		if s.server.erupeConfig.RealClientMode <= cfg.G1 {
+		if s.server.erupeConfig.RealClientMode < cfg.G1 {
 			doAckBufSucceed(s, pkt.AckHandle, make([]byte, 4))
 			return
 		}
